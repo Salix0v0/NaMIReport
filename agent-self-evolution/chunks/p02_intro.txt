@@ -1,0 +1,280 @@
+1     Introduction
+            "It is not the most intellectual of the species that survives; it is not the strongest that survives;
+            but the species that survives is the one that is able best to adapt and adjust to the changing
+            environment in which it finds itself."                                          — Charles Darwin1
+
+Large Language Models (LLMs) have demonstrated remarkable capabilities across a wide range of tasks.
+Yet, they remain fundamentally static (Luo et al., 2025a), unable to adapt their internal parameters when
+encountering novel tasks, evolving knowledge domains, or dynamic interaction contexts. As LLMs are
+increasingly deployed in open-ended, interactive environments, this limitation becomes a critical bottleneck.
+In such settings, conventional knowledge retrieval mechanisms prove inadequate, giving rise to agents capable
+of dynamically adapting their perception, reasoning, and actions in real time. This emerging need for
+dynamic, continual adaptation signals a conceptual shift in artificial intelligence: from scaling up static
+models to developing self-evolving agents. While established techniques like Supervised Fine-Tuning (SFT)
+and Reinforcement Learning (RL) provide the mechanisms for improvement, we define self-evolution not
+merely by the algorithms used, but by the locus of autonomy. Unlike traditional pipelines where human
+engineers curate data and schedule updates, a self-evolving agent is capable of continuously learning from
+new data, interactions, and experiences in real-time, leading to systems that are more robust, versatile,
+and capable of tackling complex, dynamic real-world problems (Wang et al., 2024a). This shift is currently
+driving us toward a promising and transformative path to Artificial Super Intelligence (ASI), where the
+agents not only can learn and evolve from experience with an unpredictable speed but also perform at or
+above human-level intelligence across a wide array of tasks (Wang et al., 2025g).
+Unlike static LLMs, which remain constrained by their inability to adapt to novel and evolving contexts, self-
+evolving agents are designed to overcome these limitations by continuously learning from real-world feedback.
+This progression reshapes our understanding of agents. Self-evolving agents, as a core concept, represent a
+significant step forward in the evolution of intelligent systems, acting as intermediaries that pave the way for
+more adaptive and autonomous AI, as shown in Figure 1. Recent research initiatives have increasingly focused
+on developing adaptive agent architectures capable of continually learning and adapting from experience, such
+as recent advancements in agent frameworks (Yin et al., 2025), prompting strategies (Fernando et al., 2023),
+and different optimization ways to evolve. Notwithstanding these advances, existing surveys predominantly
+address agent evolution as a subsidiary component within comprehensive agent taxonomies. Previous surveys
+primarily provide systematic overviews of general agent development, while offering limited coverage of self-
+evolving mechanisms across constrained scenarios in self-evolving agents (Luo et al., 2025a; Liu et al., 2025a).
+    1 This quote is widely attributed to Charles Darwin, but it does not appear verbatim in his writings. The phrasing is
+
+believed to originate from Professor Leon C. Megginson, who paraphrased Darwin’s ideas. Despite its frequent misattribution,
+the quote effectively captures the essence of Darwinian evolution and has since been popularized in both scientific and managerial
+literature.
+
+
+                                                                                           2
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+For example, Luo et al. (2025a) discuss several ways to evolve, such as self-learning and multi-agent co-
+evolution, while Liu et al. (2025a) explicitly introduce the evolution in terms of different components of
+agents, such as tools and prompts. Moreover, some studies focus specifically on the evolution of language
+models themselves (Tao et al., 2024), rather than on the broader concept of agents. However, these works
+address isolated components rather than the holistic agent system. Therefore, there is no systematic survey
+devoted to a dedicated, comprehensive investigation of self-evolving agents as a first-class research paradigm.
+This gap has left fundamental questions underexplored: What aspects of an agent should evolve?
+When should adaptation occur? And how should that evolution be implemented in practice?
+To the best of our knowledge, this is the first systematic and comprehensive survey focusing on self-evolving
+agents, offering a clear roadmap for both theoretical inquiry and practical deployment. However, given that
+this represents a rapidly forming research area where conceptual boundaries are still being actively negotiated
+within the community, we frame this survey as a guiding synthesis rather than a review of a fully estab-
+lished paradigm. Instead of enforcing rigid boundaries, we aim to structure the heterogeneous mechanisms
+emerging in the community into a coherent framework. We organize our analysis around three foundational
+questions — what, when, and how to evolve — and provide a structured framework for understanding each.
+Specifically, we systematically examine individual agent components, including the model, memory, tools
+and corresponding workflow, investigating their distinct evolutionary mechanisms (what to evolve of agent
+in Section 3); then we divide existing evolving methods according to different temporal stages with different
+learning paradigms such as supervised fine-tuning, reinforcement learning and inference-time evolving (when
+to evolve in Section 4). We finally summarize different signals to guide the evolution of agents, such as
+textual feedback or scalar rewards, and also different architectures of agents to evolve, such as single-agent
+and multi-agent evolution (how to evolve in Section 5). Furthermore, we review certain evaluation metrics
+and benchmarks to track existing advancements of self-evolving agents, emphasizing the importance of co-
+evolution between evaluation and agents (Section 6). We also examine emerging applications in domains such
+as coding, education, and healthcare, where continual adaptation and evolution are essential (Section 7).
+Finally, we identify persistent challenges and outline promising research directions to guide the development
+of self-evolving agents (Section 8). Through this systematic decomposition of self-evolutionary processes
+across orthogonal dimensions, we provide a structured and practical framework enabling researchers to sys-
+tematically analyze, compare, and design more robust and adaptive agentic systems. To sum up, our key
+contributions are as follows:
+
+
+     • We establish a unified theoretical framework for characterizing self-evolutionary processes in agent
+       systems, anchored around three fundamental dimensions: what evolves, how it evolves, and when it
+       evolves, providing clear design guidance for future self-evolving agentic systems.
+
+     • We further investigate the evaluation benchmark or environment tailored for self-evolving agents,
+       highlighting emerging metrics and challenges related to adaptability, robustness, and real-world
+       complexity.
+
+     • We showcase several key real-world applications across various domains, including autonomous soft-
+       ware engineering, personalized education, healthcare, and intelligent virtual assistance, illustrating
+       the practical potential of self-evolving agents.
+
+     • We identify critical open challenges and promising future research directions, emphasizing aspects
+       like safety, personalization, multi-agent co-evolution, and scalability.
+
+
+In doing so, our survey provides researchers and practitioners with a more structured taxonomy for under-
+standing, comparing, and advancing research of self-evolving agents from different perspectives. As LLM-
+based agents are increasingly integrated into mission-critical applications, understanding their evolutionary
+dynamics becomes essential, extending beyond academic research to encompass industrial applications, reg-
+ulatory considerations, and broader societal implications.
+
+
+                                                      3
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                                                                                    SCA(Zhou et al., 2025e), Self-Rewarding Self-Improving(Simonds et al., 2025),
+                                                             Policy                 SELF(Lu et al., 2023), SCoRe(Kumar et al., 2024), PAG(Jiang et al., 2025b),
+                                                                                    TextGrad(Yellamraju et al., 2024), AutoRule(Wang & Xiong, 2025), SRLM(Wang
+                                                                                    et al., 2025f)
+                                        Model
+                                                                                    SCA(Zhou et al., 2025e), AgentGen(Hu et al., 2024b), Reflexion(Shinn et al.,
+                                                                                    2023), AdaPlanner(Sun et al., 2023), SICA(Robeyns et al., 2025b), Self-
+                                                             Lesson                 Refine(Madaan et al., 2023b), Learn-by-interact(Su et al., 2025), RAGEN(Wang
+                                                                                    et al., 2025q), DYSTIL(Wang et al., 2025c)
+
+                                                                                    SAGE(Liang et al., 2024), Mem0(Chhikara et al., 2025), MemInsight(Salama
+                                                             Memory                 et al., 2025), REMEMBER(Zhang et al., 2024a), Expel(Zhao et al., 2024a),
+                                                                                    Agent Workflow Memory(Wang et al., 2024j), Richelieu diplomacy agent(Guan
+                                                                                    et al., 2024), ICE(Qian et al., 2024a)
+                                        Context
+                                                                                    APE(Zhou et al., 2022), ORPO(Yang et al., 2023), ProTeGi(Pryzant et al.,
+                                                                                    2023), PromptAgent(Wang et al., 2023d), REVOLVE(Zhang et al., 2024e),
+                                                             Prompt                 PromptBreeder(Fernando et al., 2023), DSPy(Khattab et al., 2023), Trace(Wang
+                                                                                    et al., 2023c), TextGrad(Yellamraju et al., 2024), SPO(Xiang et al., 2025), LLM-
+                                                                                    AutoDiff(Yin & Wang, 2025), EvoAgent(Yuan et al., 2024b)
+                      What to evolve
+                                                                                    Voyager(Wang et al., 2023a), Alita(Qiu et al., 2025b), ATLASS(Haque
+                                                             Creation               et al., 2025), CREATOR(Qian et al., 2023b), SkillWeaver(Zheng et al.,
+                                                                                    2025a), CRAFT(Yuan et al., 2024a)
+
+
+                                                             Mastery                LearnAct(Zhao et al., 2024b), DRAFT(Qu et al., 2025), ToolLLM(Qin et al.,
+                                        Tool                                        2023), Toolformer(Schick et al., 2023), Gorilla(Patil et al., 2024)
+
+                                                                                    ToolGen(Wang et al., 2025k), AgentSquare(Shang et al., 2025), Darwin Godel
+                                                                                    Machine(Zhang et al., 2025h), COLT(Qu et al., 2024a), TOOLRET(Shi
+                                                             Selection              et al., 2025c), ToolRerank(Zheng et al., 2024b), PTR(Gao & Zhang, 2024),
+                                                                                    SSO(Nottingham et al., 2024)
+
+                                                                                    AgentSquare(Shang et al., 2025), Darwin Godel Machine(Zhang
+                                                             Single-Agent           et al., 2025h), Gödel Agent (Yin et al., 2025), AlphaE-
+                                                                                    volve(Novikov et al., 2025), TextGrad(Yellamraju et al., 2024),
+                                                                                    EvoFlow(Zhang et al., 2025c), MASS(Zhou et al., 2025a)
+                                        Architecture
+                                                                                    AFlow(Zhang et al., 2024c), ADAS(Hu et al., 2024c), AutoFlow(Li et al., 2024d),
+                                                             Multi-Agent            GPTSwarm(Zhuge et al., 2024), ScoreFlow(Wang et al., 2025n), FlowRea-
+                                                                                    soner(Gao et al., 2025), ReMA(Wan et al., 2025), GIGPO(Feng et al., 2025b)
+
+                                                                                    Reflexion(Shinn et al., 2023), SELF(Madaan et al., 2023a), AdaPlanner(Sun
+                                                             ICL                    et al., 2023), TrustAgent(Hua et al., 2024)
+
+                                        Intra-test-time                             Self-Adaptive LM(Zweiger et al., 2025), TTT-NN(Hardt & Sun, 2023),
+                                        self-evolution       SFT                    SIFT(Hübotter et al., 2024)
+
+                                                             RL                     LADDER(Simonds & Yoshiyama, 2025), Ttrl(Zuo et al., 2025)
+                      When to evolve
+                                                                                    SELF(Lu et al., 2023), STaR(Zelikman et al., 2022), Quiet-STaR(Zelikman et al.,
+                                                             SFT
+Self-evolving Agent
+
+
+
+
+                                                                                    2024), SiriuS(Zhao et al., 2025b), Chen et al.(Chen et al., 2025b)
+                                        Inter-test-time
+                                        self-evolution
+                                                                                    RAGEN(Wang et al., 2025q), Learning-Like-Humans(Zhang et al., 2025a), We-
+                                                             RL                     bRL(Qi et al., 2024), DigiRL(Bai et al., 2024)
+
+                                                                                    Reflexion(Shinn et al., 2023), AdaPlanner(Sun et al., 2023), AgentS2(Agashe
+                                                             Textual Feedback       et al., 2025), SELF(Lu et al., 2023), Self-Refine(Madaan et al., 2023a),
+                                                                                    SCoRe(Kumar et al., 2024), PAG(Jiang et al., 2025b), TextGrad(Yellamraju
+                                                                                    et al., 2024)
+
+                                                                                    CISC(Taubenfeld et al., 2025), Self-Ensemble(Xu et al., 2025b), SRSI(Simonds
+                                                             Internal Rewards       et al., 2025), Self-Certainty(Kang et al., 2025), Self-Rewarding Language Mod-
+                                                                                    els(Yuan et al., 2025b)
+                                        Reward-based
+                                        Self-Evolution                              Self-Train LM(Shafayat et al., 2025), MM-UPT(Wei et al., 2025c), CoVo(Zhang
+                                                                                    et al., 2025j), SWE-Dev(Du et al., 2025), SICA(Robeyns et al., 2025a), Feed-
+                                                             External Rewards       back Friction(Jiang et al., 2025a), USEagent(Applis et al., 2025), DYSTIL(Wang
+                                                                                    et al., 2025c), OTCPO(Wang et al., 2025h), AutoRule(Wang & Xiong, 2025),
+                                                                                    EGSR(Zhang et al., 2025a), LADDER(Simonds & Yoshiyama, 2025), RA-
+                                                                                    GEN(Wang et al., 2025q), SPIRAL(Liu et al., 2025d)
+
+                                                             Implicit Rewards       Reward Is Enough(Song et al., 2025), Endogenous reward(Li et al., 2025e)
+                      How to evolve
+                                                             Self-Generated         STaR(Zelikman et al., 2022), V-STaR(Hosseini et al., 2024), AdaSTaR(Koh
+                                                                                    et al., 2025), STIC(Deng et al., 2024), GENIXER(Zhao et al., 2024c)
+                                        Imitation & Demon-
+                                        stration Learning
+                                                             Others                 SiriuS(Zhao et al., 2025b), SOFT(Tang et al., 2025), RISE(Qu
+                                                                                    et al., 2024b), IoE(Li et al., 2024b)
+
+
+                                                             Single Agent           DGM(Zhang et al., 2025h), GENOME(Zhang et al., 2025r), SPIN(Chen et al.,
+                                        Population-based                            2024f), SPC(Chen et al., 2025c), STL(Mendes & Ritter, 2025)
+                                        & Evolutionary
+                                        Methods                                     EvoMAC(Hu et al., 2024d), Puppeteer(Dang et al., 2025), MDTeamGPT(Chen
+                                                             Multi-Agent
+                                                                                    et al., 2025e), MedAgentSim(Almansoori et al., 2025b)
+
+                                                             Memory                 Mobile-Agent-E(Wang et al., 2025o), MobileSteward(Liu et al., 2025f)
+
+                                                             Curriculum             WebRL(Qi et al., 2024), Voyager(Wang et al., 2023a)
+                                        General Domain       Learning
+
+                                                             Model-Agent            WebEvolver(Fang et al., 2025b), UI-Genie(Xiao et al., 2025a), Absolute-
+                      Where to Evolve                        Co-Evolution           Zero(Zhao et al., 2025a)
+
+                                                             Coding, GUI            EvoMac(Hu et al., 2024d), SICA(Robeyns et al., 2025a), AgentCoder(Dang et al.,
+                                                             Finalicial...          2025), QuantAgent(Wang et al., 2024d)
+                                        Specialized Domain
+                                                             Others                 Arxiv-copilot(Lin et al., 2024), Voyager(Wang et al., 2023a)
+
+
+
+
+Figure 2: Taxonomy of self-evolving agents, in which agents are analyzed along the what, when, how, and
+where dimensions, with selected representative methods and systems annotated at each leaf node.
+
+
+
+
+                                                                                4
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+             What to Evolve?                                 When to Evolve?                                         Where to Evolve?
+                    Context
+                                                                      Task Completion                                  General Domain
+      Memory              Prompts
+                                                                                                                     General-purpose Applications
+                                                    Intra-test-time                     Inter-test-time
+      Store / Retrieve          Instruct            Self-evolution                      Self-evolution
+                                                                                                                        Specific Domain
+                                                Methods       ICL                SFT             RL
+                 Agent                                                                                       Coding            GUI             Financial
+
+                                                                                                             Medical           Education       Others
+       Plan, Reason           Call / Return                   How to Evolve?
+                                              Reward-based          Imitation &        Population-based
+      Models
+       Model                  Tools
+                                                                   Demonstration
+                                                                                                                        Evaluation
+                   Agentic
+                 Architecture                    Textual            Self-Generated                                      Goals & Metrics
+                                                                                            Single Agent
+       Single Agent           Multi-Agent        Internal                                                       Adaptivity           Retention
+           Query                Query                               Cross-Agent
+                                                 External
+                                                                                            Multi-Agent     Generalization        Efficiency        Safety
+                                                 Implicit           Hybrid
+
+
+                                                    Cross-cutting Evolutionary Dimensions                                    Paradigm
+
+                                                  Online/Offline        On/Off-policy         Granularity   Static       Short-horizon     Long-horizon
+           Answer               Answer
+
+
+
+
+Figure 3: A comprehensive overview of self-evolving agents across key dimensions. From left to
+right and top to bottom, the figure mirrors the organization of Sections 3–7. What to evolve (Sec. 3) decom-
+poses agent components: model, context, tools, and architecture, showing where evolution operates. When
+to evolve (Sec. 4) distinguishes intra-test-time versus inter-test-time self-evolution, corresponding to ICL,
+SFT, and RL paradigms. How to evolve (Sec. 5) summarizes methodological families—reward-based, imita-
+tion & demonstration, and population-based—together with cross-cutting dimensions such as online/offline,
+on/off-policy, and reward granularity. Where to evolve (Sec. 6) contrasts general-purpose and domain-
+specific deployments (e.g., coding, GUI, finance, medical, education). Evaluation (Sec. 7) outlines goals
+and metrics—adaptivity, generalization, efficiency, safety—and corresponding evaluation paradigms (static,
+short-horizon, long-horizon). Overall, the taxonomy maps the survey’s reasoning flow: defining what, when,
+and how to evolve establishes the foundation for evaluating and advancing self-evolving agents.
+
+

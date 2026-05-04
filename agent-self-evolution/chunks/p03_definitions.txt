@@ -1,0 +1,227 @@
+2     Definitions and Foundations
+
+Before delving into a comprehensive survey, we first present a formal definition of self-evolving agents and
+introduce a taxonomy of the key aspects in self-evolving agents. We also discuss the relationships between
+self-evolving agents and other renowned learning paradigms, such as curriculum learning, lifelong learning,
+model editing, and unlearning, highlighting the adaptive, dynamic, and autonomous nature of self-evolving
+agents.
+
+2.1   Definitions
+
+Environment We first define the environment (including the user and the execution environment, e.g.,
+Linux shell) of an agent system as a partially observable Markov Decision Process (POMDP), represented
+as a tuple E = (G, S, A, T, R, Ω, O, γ), where:
+
+      • G is a set of potential goals. Each g ∈ G is a task objective that the agent needs to achieve, e.g., a
+        user query.
+
+      • S is a set of states. Each s ∈ S represents the internal state of the environment.
+
+      • A is a set of actions. Each action a ∈ A can be a combination of textual reasoning, retrieval of
+        external knowledge, and tool calls.
+
+
+                                                                             5
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Figure 4: An evolutionary landscape of several representative self-evolving agent frameworks from 2022 to
+2025. The figure chronologically organizes major research milestones in the development of self-evolving
+agents with capabilities such as autonomous planning, tool use, and continual self-improvement.
+
+
+     • T is the state transition probability function which takes a state-action pair (s, a) and outputs the
+       probability distribution T (s′ |s, a) of the next state.
+     • R : S × A × G → R is the feedback/reward function, conditioned on the specific goal g ∈ G. The
+       feedback r = R(s, a, g) typically takes the form of a scalar score or textual feedback.
+     • Ω is a set of observations accessible to the agent.
+     • O is the observation probability function which takes a state-action pair (s, a) and outputs the
+       probability distribution O(o′ |s, a) of the next observation for the agent.
+     • γ is the discount factor.
+
+Agent system We define a (multi-)agent system as Π = (Γ, {ψi }, {Ci }, {Wi }). The architecture Γ deter-
+mines the control flow of the agent system or collaborative structures between multiple agents. It is typically
+represented as a sequence of nodes (N1 , N2 , ...) organized by graph or code structures. Each node Ni consists
+of the following components:
+
+     • ψi : the underlying LLM/MLLM.
+     • Ci : the context information, e.g., prompt Pi and memory Mi .
+     • Wi : the set of available tools/APIs.
+
+At each node, the agent policy is a function πθi (·|o) that takes an observation and outputs the probability
+distribution of the next action, where θi = (ψi , Ci ). The actual action space here is the union of the natural
+language space and the tool space Wi .
+For a given task T = (E, g), represented by an environment E and a corresponding goal g ∈ G, the agent
+system follows the topology Γ to generate a trajectory τ = (o0 , a0 , o1 , a1 , ...), and receives a feedback r either
+from the external environment or from internal signals (e.g., self-confidence or feedback from an evaluator).
+
+
+                                                          6
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Self-evolving strategy A self-evolving strategy is a transformation f that maps the current agent system
+to a new state, conditioned on the generated trajectory τ and the external/internal feedback r:
+
+                                    f (Π, τ, r) = Π′ = (Γ′ , {ψi′ }, {Ci′ }, {Wi′ })                           (1)
+
+Objective of self-evolving agents Let U be a utility function that measures the performance of an
+agent system Π on a given task T by assigning a scalar score U (Π, T ) ∈ R. The utility may be derived
+from the task-specific feedback r, such as a reward signal or textual evaluation, possibly combined with
+other performance indicators (e.g., completion time, accuracy, or robustness). Given a sequence of tasks
+(T0 , T1 , ..., Tn ) and an initial agent system Π0 , a self-evolving strategy f recurrently generates an evolving
+sequence of agent systems (Π1 , Π2 , ..., Πn ) via
+
+                                               Πj+1 = f (Πj , τj , rj ),                                       (2)
+
+where τj and rj are the trajectory and feedback on task Tj .
+The overarching objective in designing a self-evolving agent is to construct a strategy f such that the
+cumulative utility over tasks is maximized:
+                                                       n
+                                                       X
+                                                 max         U (Πj , Tj )                                      (3)
+                                                   f
+                                                       j=0
+
+
+Operational definition of self-evolving agents To provide a conceptual boundary, we introduce an
+operational definition of self-evolving agents. A self-evolving agent is the agent that modifies its internal
+parameters, contextual state, toolset, or architectural topology based on its own trajectories or feedback signals,
+with the explicit objective of improving future performance.
+This definition entails three inclusion criteria: (i) updates must be experience-dependent, driven by trajec-
+tories, self-generated data, or environment feedback, specifically targeting the agent’s policy limitations or
+capability boundaries rather than generic data synthesis; (ii) updates must produce a persistent, policy-
+changing effect rather than a transient instruction-following behavior; (iii) the system must possess mecha-
+nisms for autonomous exploration or self-initiated learning, even if it also leverages pre-collected data. For
+clarity, we use "passive" to denote learning triggered exclusively by externally provided data or schedules, and
+"active" to denote self-initiated exploration, reflection, or structural modification (i.e., using self-reflection
+to collect data), explicitly excluding static pipelines (e.g., standard distillation) where data generation is
+agnostic to the agent’s interaction history.
+As this field is rapidly forming, fully autonomous self-evolution without human intervention represents
+an aspirational goal rather than the current norm. In this survey, we do not impose a rigid exclusion
+threshold that would disregard early-stage developments. Instead, we analyze the mechanisms contributing
+to the self-evolving paradigm ranging from proto-evolution (e.g., iterative bootstrapping or feedback-
+driven prompting) to strong self-evolution (fully autonomous diagnosis and reconfiguration), allowing us
+to provide a comprehensive view of how diverse methods contribute to the "What, When, and How" of the
+paradigm’s progression toward full autonomy.
+
+2.2   Relationships with Other Works
+
+Table 1 summarizes the key distinctions between self-evolving agents and other paradigms (including cur-
+riculum learning, lifelong learning, model editing, and unlearning). We provide a brief introduction to
+each paradigm below, highlighting the differences among these paradigms, as well as the differences with
+self-evolving agents.
+
+Curriculum Learning Curriculum learning is a training strategy in which data are presented in order of
+increasing difficulty (Bengio et al., 2009; Wang et al., 2021). This strategy resembles human curricula where
+concepts are introduced progressively from simple to complex. Curriculum learning has been widely adopted
+across diverse domains, including computer vision (Guo et al., 2018; Jiang et al., 2014; Liu et al., 2023a),
+
+
+                                                             7
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+natural language processing (Platanios et al., 2019; Tay et al., 2019), speech recognition (Braun et al., 2017;
+Lotfian & Busso, 2019), etc. Recently, several curriculum learning-based methods have been proposed to
+fine-tune LLMs during the post-training phase (Wang et al., 2025p; Zhang et al., 2025o; Parashar et al.,
+2025; Zhang et al., 2025a; Li et al., 2025b). The framework for curriculum learning generally comprises
+two key components: a difficulty measurer that quantifies the difficulty level of each training data point,
+and a training scheduler that reorganizes the order of data points received by the model according to the
+difficulty level. Unlike curriculum learning, which operates on a static dataset, self-evolving agents aim to
+handle sequential tasks in dynamic environments. Additionally, curriculum learning updates only model
+parameters, whereas self-evolving agents are able to adjust non-parametric components like memory and
+tools.
+
+Lifelong Learning Lifelong learning refers to the ability of AI models to continuously and adaptively learn
+when exposed to new tasks and environments, while retaining previously acquired knowledge and abilities.
+This learning paradigm, also known as continual learning or incremental learning, is crucial for AI models
+to operate in dynamic and complex environments (Wang et al., 2024c; Zheng et al., 2025c; Parisi et al.,
+2019; Shi et al., 2024; Yang et al., 2025d; Zhou et al., 2024a). The primary goal of lifelong learning for AI
+models is to achieve a balance between preserving existing knowledge (stability) and acquiring new knowledge
+(plasticity) when exposed to new data or tasks (McCloskey & Cohen, 1989; Zheng et al., 2025c; Ratcliff,
+1990; Rolnick et al., 2019). Though it shares the sequential task setting with self-evolving agents, lifelong
+learning differs in two fundamental ways: (1) Memory functionality and usage timing: While continual
+learning methods extensively employ memory mechanisms (e.g., experience replay buffers (Rolnick et al.,
+2019), episodic memory (Lopez-Paz & Ranzato, 2017)) to mitigate catastrophic forgetting, these mechanisms
+primarily serve as training-time tools for parameter optimization through gradient computation. In contrast,
+self-evolving agents leverage runtime context (prompts, working memory, conversation history) that directly
+influences action generation at test-time without requiring parameter updates. The distinction lies not in
+the presence of non-parametric components, but in their functional role: training-time replay vs. test-
+time state adaptation. (2) Learning initiative: Lifelong learning primarily acquires knowledge passively
+through externally provided task sequences, whereas self-evolving agents actively explore their environment
+and incorporate internal reflection or self-evaluation mechanisms to guide their own learning trajectory.
+Recent self-improving LLM methods (Huang et al., 2022; Yuan et al., 2024d), which iteratively refine models
+through self-generated data and self-critique, can be viewed as instances of lifelong learning focused on
+model-centric improvement. Self-evolving agents extend beyond this paradigm to encompass system-wide
+evolution including tool acquisition, architectural reconfiguration, and environmental exploration.
+
+Model Editing and Unlearning Model editing and unlearning aim to efficiently and precisely modify
+specific knowledge in AI models while preserving irrelevant knowledge and avoiding full retraining (Wang
+et al., 2024f; 2025i; Zhang et al., 2024d; Wang et al., 2025i; Nguyen et al., 2022; Geng et al., 2025a). A
+canonical application of model editing is to perform efficient and precise localized factual updates (e.g.,
+modifying the answer to "2021 Olympics host city" from "Tokyo" to "Paris"). Early methods focused on
+triples of atomic knowledge and later expanded into various trustworthy-related tasks (Fang et al., 2025a;
+Huang et al., 2025a). Recent studies also propose lifelong model editing(Chen et al., 2024c) that sequentially
+performs model editing. For model unlearning, early efforts mainly focus on the removal of privacy-related
+information (Chen et al., 2021). With the rapid development of LLMs, model unlearning is also used to
+enhance LLMs’ safety (Zhang et al., 2024j; Li et al., 2024c; Zou et al., 2024; Lu et al., 2025). Compared to
+lifelong learning, model editing shares an aligned objective: both aim to acquire new knowledge or capabilities
+while mitigating catastrophic forgetting. However, lifelong learning typically relies on extensive gradient-
+based fine-tuning across all model parameters, whereas model editing often modifies only a small subset of
+parameters in a targeted manner. Compared to self-evolving agents, model editing (1) cannot modify non-
+parametric components such as memory or tools, and (2) relies on a pre-defined pipeline from the algorithm
+designer, whereas self-evolving agents can spontaneously employ more diverse and flexible strategies based
+on the observation of the environment or internal feedback signals.
+
+Positioning Self-Evolving Agents To clarify the relationships among these paradigms and to motivate
+the role of self-evolving agents, we examine them through two complementary perspectives: a problem-setting
+
+
+                                                      8
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+             Table 1: Comparison between self-evolving agents and other renowned paradigms
+                       Runtime    Evolving    Dynamic      Test-time     Active      Structural   Self-reflect
+Paradigm
+                       Context    Toolset      Tasks      Adaptation   Exploration    Change        & Eval
+Curriculum Learning        ✗          ✗          ✗            ✗             ✗             ✗            ✗
+Lifelong Learning          ✗          ✗          ✓            ✗             ✗             ✗            ✗
+Model Editing              ✗          ✗          ✓            ✓             ✗             ✗            ✗
+Self-evolving Agents       ✓          ✓          ✓            ✓             ✓             ✓            ✓
+
+
+
+lens and a solution-paradigm lens. This distinction clarifies the basis of each paradigm - whether it emerges
+from constraints and challenges inherent to the learning setting, or from methodological proposals for how
+the model or agent itself can be updated.
+
+     • Problem-setting view. Curriculum learning and lifelong learning arise from concrete learning
+       problems. Curriculum learning addresses how to structure training examples of varying difficulty
+       so a model can handle complex samples more effectively; lifelong learning focuses on acquiring new
+       abilities over time while mitigating catastrophic forgetting. These paradigms are therefore driven
+       by the problems they aim to solve and primarily specify how experience is organized for the learner,
+       rather than how the agent itself may adapt beyond parameter updates.
+
+     • Solution-paradigm view. Model editing and self-evolving agents, in contrast, originate as so-
+       lutions: they propose mechanisms for updating or modifying a system. Model editing provides
+       targeted procedures—typically localized parameter adjustments—to correct or insert knowledge.
+       Self-evolving agents generalize this idea by treating adaptation as a first-class capability, allowing
+       not only parameter updates but also changes to runtime context, memory, tools, and workflow
+       structures, driven by the agent’s own trajectories and feedback signals.
+
+Viewed through this two-lens framework, curriculum and lifelong learning are anchored in the nature of the
+learning problems they address, whereas model editing and self-evolving agents are defined by the methods
+they provide for effecting change. Self-evolving agents thus represent a system-level solution paradigm: they
+include parameter-level editing as one update pathway while enabling broader, persistent, and interaction-
+driven evolution across multiple components of an agent.
+

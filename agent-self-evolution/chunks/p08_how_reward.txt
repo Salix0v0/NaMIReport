@@ -1,0 +1,227 @@
+5   How to Evolve
+
+The pursuit of self-evolution lies at the heart of building advanced, autonomous, and increasingly general
+artificial intelligence. For large language models (LLMs) and their agentic extensions, the question of how to
+continually, autonomously, and efficiently evolve their capabilities has become a central challenge. Therefore,
+the third key aspect of a self-evolving agent is to instantiate an effective evolving strategy f , i.e., how to
+transform an agent system Π = (Γ, {ψi }, {Ci }, {Wi }) to its new state Π′ = (Γ′ , {ψi′ }, {Ci′ }, {Wi′ }). Unlike
+traditional approaches that rely on static datasets or one-time supervised fine-tuning, self-evolution empha-
+sizes an ongoing process where models learn from real-world interactions, actively seek feedback, self-reflect,
+generate or curate new data, and adapt their strategies in response to dynamic environments. This contin-
+uous evolution is not merely a matter of scaling up data or computation; it requires the agent to acquire
+a spectrum of meta-capabilities, including self-correction, autonomous data generation, knowledge transfer,
+and multi-agent collaboration. As a result, the landscape of self-evolution has become increasingly rich and
+multi-faceted, with each methodological branch exploring different axes of feedback, learning paradigms,
+data sources, and evolutionary scales.
+Over time, research on self-evolving agents has progressed through three major paradigms—reward-based,
+imitation-based, and population-based evolution—each emerging to address the limitations of the previous
+one. Reward-based methods first closed the feedback loop through explicit signals but suffered from brittle-
+ness and high cost. Imitation-based learning stabilized evolution by leveraging high-quality demonstrations,
+though sometimes at the expense of exploration. Population-based evolution then extended adaptation to
+collective scales, emphasizing diversity and emergent coordination. Together, these paradigms outline a
+coherent trajectory from individual self-improvement toward collective intelligence.
+This chapter aims to systematically map and analyze the major families of self-evolution methods, providing a
+unified framework for understanding their principles, mechanisms, and interactions. We begin with reward-
+based evolution, which centers on the design of reward signals—ranging from natural language feedback
+and internal confidence metrics to external or implicit signals—to guide iterative self-improvement.
+
+
+                                                       19
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Table 3: Overview of Reward-based, Imitation/Demonstration, and Population-based Learning Methods for
+Self-Evolving Agents. This table categorizes key approaches based on the following criteria: (1) Feedback
+Type: the type of feedback used, including language-based rationales and numerical rewards. (2) Feedback
+Source: the origin of the feedback, either internal (model-generated) or external (provided externally). (3)
+Learning Method: the learning paradigm applied, such as in-context learning (ICL), supervised fine-tuning
+(SFT), reinforcement learning (RL), and evolutionary algorithms; (4) Updated Components: which parts
+of the model are updated, either full parameters or a subset of the model. (5) Update Timing: the stage
+during the agent’s evolution when updates are applied, such as pre-training, pre-test, or test-time.
+                    Method                            Feedback Type          Feedback Source       Learning Method          Updated Components                     Update Timing
+                                                                                Reward-based Evolution Methods
+            Reflexion(Shinn et al., 2023)                 language                 internal              ICL                         context                             test-time
+            AdaPlanner(Sun et al., 2023)                  language           external + internal         ICL                         context                             test-time
+            AgentS2(Agashe et al., 2025)                  language                external               ICL                         context                             test-time
+                SELF(Lu et al., 2023)                     language           external + internal         SFT                       full params                  pre-test time + test-time
+      SELF-REFINE(Madaan et al., 2023a)                   language                 internal              ICL                         context                             test-time
+             SCoRe(Kumar et al., 2024)                    numerical               external                RL                       full params                        pre-test time
+               PAG(Jiang et al., 2025b)                  numerical                external                RL                       full params                        pre-test time
+         TextGrad(Yellamraju et al., 2024)                language                external               ICL                         context                    pre-test time / test-time
+             SRSI(Simonds et al., 2025)                   language                 internal               RL                       full params                        pre-test time
+        Self-Train LM(Shafayat et al., 2025)             numerical                 internal               RL                       full params                        pre-test time
+             MM-UPT(Wei et al., 2025c)                   numerical                 internal               RL                       full params                        pre-test time
+              CoVo(Zhang et al., 2025j)                  numerical                 internal               RL                       full params                        pre-test time
+             SWE-agent(Du et al., 2025)                   language                external               ICL                         context                             test-time
+            SICA(Robeyns et al., 2025a)                  numerical                external               ICL           codebase(tools, workflows, prompts)               test-time
+       Feedback Friction(Jiang et al., 2025a)             language                external               ICL                         context                             test-time
+           USEagent(Applis et al., 2025)                  language                external               ICL                         context                             test-time
+            DYSTIL(Wang et al., 2025c)              language + numerical     external + internal       SFT+RL                      full params                  pre-test time + test-time
+            OTC-PO(Wang et al., 2025h)                    numerical               external                RL                       full params                        pre-test time
+        AUTORULE(Wang & Xiong, 2025)                language + numerical     external + internal          RL                       full params                        pre-test time
+             EGSR(Zhang et al., 2025a)                   numerical                external                RL                       full params                        pre-test time
+     LADDER(Simonds & Yoshiyama, 2025)                    numerical               external                RL                       full params                        pre-test time
+            RAGEN(Wang et al., 2025q)                    numerical                external                RL                       full params                           test-time
+              SPIRAL(Liu et al., 2025d)                   numerical                internal               RL                       full params                        pre-test time
+        ICRL Prompting(Song et al., 2025)                numerical           external + internal          RL                       full params                           test-time
+    MATH-SHEPHERD(Wang et al., 2023b)                    numerical                external                RL                       full params                        pre-test time
+           AgentPRM(Choudhury, 2025)                     numerical                external             SFT+RL                      full params                        pre-test time
+             Agent Q(Putta et al., 2024)                 numerical                external                RL                       full params                        pre-test time
+             GiGPO(Feng et al., 2025a)                   numerical                external                RL                       full params                        pre-test time
+            SPA-RL(Wang et al., 2025d)                    numerical               external                RL                       full params                        pre-test time
+          Self-Instruct(Wang et al., 2022)                language                 internal              SFT                       full params                        pre-test time
+            WizardLM(Xu et al., 2024a)                    language                 internal              SFT                       full params                        pre-test time
+           OS-Genesis(Sun et al., 2024b)                 numerical                external               SFT                       full params                        pre-test time
+            UI-Genie(Xiao et al., 2025a)                 numerical                external               SFT                     partial params                       pre-test time
+              GUI-R1(Luo et al., 2025b)                  numerical                external             SFT+RL                      full params                        pre-test time
+            InfiGUI-R1(Liu et al., 2025e)                 numerical               external             SFT+RL                      full params                        pre-test time
+             Voyager(Wang et al., 2023a)                  language                external               ICL                         context                             test-time
+              SwiftSage(Lin et al., 2023)                 language                external               ICL                         context                             test-time
+          AutoWebGLM(Lai et al., 2024)                    language                external             SFT+RL                      full params                        pre-test time
+               DigiRL(Bai et al., 2024)                   language                external                RL                     partial params                       pre-test time
+                WebRL(Qi et al., 2024)                    language                external             SFT+RL                      full params                        pre-test time
+ Let’s Verify Step-by-Step(Lightman et al., 2023)         language                external               SFT                       full params                        pre-test time
+          AlphaMath(Chen et al., 2024a)                   numerical               external               SFT                       full params                        pre-test time
+           rStar-Math(Guan et al., 2025)                  numerical               external               SFT                       full params                        pre-test time
+             DistRL(Wang et al., 2024g)                   language                external                RL                       full params                  pre-test time + test-time
+         MobileGUI-RL(Shi et al., 2025b)                  language                external                RL                       full params                        pre-test time
+                                                                      Imitation and Demonstration Learning Methods
+          STaR(Zelikman et al., 2022)               language + numerical           internal             SFT                        full params                        pre-test time
+         V-STaR(Hosseini et al., 2024)                    numerical          external + internal      SFT + RL                    partial params                      pre-test time
+          AdaSTaR(Koh et al., 2025)                       numerical                internal             SFT                        full params                        pre-test time
+            STIC(Deng et al., 2024)                       language                 internal           RL + SFT                    partial params                      pre-test time
+         GENIXER(Zhao et al., 2024c)                      language                 external             SFT                        full params                        pre-training
+           SiriuS(Zhao et al., 2025b)               language + numerical           internal             SFT                        full params                        pre-test time
+           SOFT(Tang et al., 2025)                        language                 internal             SFT                        not specified                      pre-test time
+            RISE(Qu et al., 2024b)                  language + numerical     internal + external        SFT                        full params                        pre-test time
+              IoE(Li et al., 2024b)                       numerical                internal               /                              /                              test-time
+                                                                           Population-based and Evolutionary Methods
+         DGM(Zhang et al., 2025h)                         numerical               external                ICL          codebase (tools, workflows, prompts)              test-time
+         EvoMAC(Hu et al., 2024d)                         language                external                ICL          team composition, workflow, prompts               test-time
+          SPIN(Chen et al., 2024f)                        language                internal                RL                        full params                        pre-test time
+       GENOME(Zhang et al., 2025r)                        numerical               external           Evolution Alg.               partial params                       pre-test time
+          SPC(Chen et al., 2025c)                         numerical               internal             SFT+RL                      critic params                pre-test time + test-time
+        Puppeteer(Dang et al., 2025)                      numerical               external                RL                      planner policy              pre-test time / between tasks
+    MedAgentSim(Almansoori et al., 2025b)                 language                external                ICL               context (knowledge base)                     test-time
+        STL(Mendes & Ritter, 2025)                  language + numerical          internal               SFT                        value model                        pre-test time
+      MDTeamGPT(Chen et al., 2025e)                       language                external                ICL               context (knowledge base)                     test-time
+
+
+
+
+Next, we examine imitation and demonstration learning, where agents learn by mimicking complete,
+high-quality behavioral exemplars (i.e., demonstrations). While traditionally sourced from human experts,
+in the context of self-evolving agents, these exemplars are often generated by the agent itself or by other
+agents. This paradigm is particularly powerful when demonstrations are abundant or can be autonomously
+synthesized, and it has driven significant progress in both reasoning and multimodal domains.
+
+
+                                                                                              20
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+ Textual Feedback                                                                Internal Reward
+ Natural language: My plan was to ...                                            Model’s own probability estimates or
+ However, the task says to... I should                                           certainty
+ have …                                       Reward-Based
+                                                Evolution
+ Implicit Reward                                                                  External Reward
+ In-context RL using simple scalar                                                Environment, majority voting, or
+ signals                                                                          explicit rules
+
+
+
+
+Figure 6: Overview of reward-based self-evolution strategies, categorized into textual, implicit, internal, and
+external rewards, each associated with distinct feedback sources and mechanisms.
+
+
+Finally, we introduce population-based and evolutionary methods, which draw inspiration from bio-
+logical evolution and collective intelligence. These approaches maintain populations of agent variants or col-
+laborating agents, leveraging mechanisms such as selection, mutation, crossover, and competition to explore
+the solution space in parallel, foster diversity, and enable the emergence of novel strategies or architectural
+innovations.
+
+5.1   Reward-based Self-Evolution
+
+The capacity for self-improvement is a cornerstone of advanced intelligence. In the context of Large Language
+Models (LLMs), this manifests as a dynamic process of reward-driven evolution, where models iteratively
+learn from their own outputs and interactions to refine their capabilities. The design of the reward signal,
+which serves as the guiding feedback, is crucial; it determines the nature, efficiency, and effectiveness of
+the learning process. In this section, we systematically review the main methodologies for reward design,
+categorized by the nature of the feedback: textual feedback, internal confidence, external rewards, and
+implicit rewards.
+
+Textual Feedback Textual Feedback leverages the native modality of LLMs—natural language—to pro-
+vide detailed, interpretable instructions for refinement. Unlike scalar rewards, textual feedback encapsulates
+nuanced critiques and actionable suggestions. Recent frameworks such as Reflexion (Shinn et al., 2023),
+AdaPlanner (Sun et al., 2023), AgentS2 (Agashe et al., 2025), SELF (Lu et al., 2023), Self-Refine (Madaan
+et al., 2023a), SCoRe (Kumar et al., 2024), PAG (Jiang et al., 2025b), and TextGrad (Yellamraju et al.,
+2024) exemplify this direction. For instance, Reflexion proposes “verbal reinforcement learning,” where
+agents reflect in natural language on their past trials, storing these reflections as episodic memory to guide
+future decisions. AdaPlanner enables closed-loop adaptive planning by allowing LLM agents to revise their
+plans based on both in-plan and out-of-plan feedback, while also mitigating hallucination via code-style
+prompts and leveraging skill discovery. Self-Refine and SELF further explore iterative self-feedback and self-
+correction, demonstrating that even state-of-the-art models can be improved via multi-turn, language-based
+self-critique, without additional supervised data or external reinforcement. Such frameworks highlight the
+power of language as a reward channel, enabling nuanced, flexible, and sample-efficient self-improvement.
+
+Internal Rewards Internal Confidence-based rewards move away from external signals and instead exploit
+internal metrics such as the model’s probability estimates or certainty. This paradigm leverages the model’s
+intrinsic understanding to guide improvement without relying on external supervision. Methods such as
+Confidence-Informed Self-Consistency (CISC) (Taubenfeld et al., 2025), Self-Ensemble (Xu et al., 2025b),
+Self-Rewarding Self-Improving (Simonds et al., 2025), scalable best-of-N selection via self-certainty (Kang
+et al., 2025), and Self-Rewarding Language Models (Yuan et al., 2025b) allow models to self-evaluate and
+calibrate their responses based on internal confidence metrics. For example, CISC weights reasoning paths
+by confidence scores to improve both accuracy and computational efficiency, effectively filtering high-quality
+solutions from multiple candidates. Self-Ensemble mitigates confidence distortion by dividing choices into
+smaller, more manageable groups and aggregating predictions to reduce overconfidence bias. Self-Rewarding
+
+
+                                                      21
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Language Models demonstrate that models can act as their own reward function, generating training data
+through self-instruction and self-evaluation cycles. These approaches can reduce reliance on human labels and
+external evaluators, enabling scalable and autonomous self-improvement loops that can operate continuously
+without human intervention. AgentEvolver (Zhai et al., 2025) proposes a comprehensive framework to
+improve agent training efficiency through three synergistic mechanisms: self-questioning for autonomous
+task generation, self-navigating for experience-guided exploration, and self-attributing for fine-grained credit
+assignment. In particular, its self-attributing mechanism uses an LLM’s reasoning to retrospectively assign
+step-wise rewards that are dense and semantically grounded for policy optimization.
+
+External Rewards External Rewards are derived from sources outside the model, such as the environ-
+ment, majority voting, or explicit rules. Majority voting (Shafayat et al., 2025; Wei et al., 2025c; Zhang et al.,
+2025j) uses consensus among multiple model outputs as a proxy for correctness, providing a self-generated
+but grounded reward signal. Environment feedback, including tool-based signals, is central to agentic LLM
+research (e.g., SWE-Dev (Du et al., 2025), SICA (Robeyns et al., 2025a), Feedback Friction (Jiang et al.,
+2025a), USEagent (Applis et al., 2025), DYSTIL (Wang et al., 2025c)), where agents learn through direct
+interaction with real-world environments and tools. Rule-based rewards (Wang et al., 2025h; Wang & Xiong,
+2025; Zhang et al., 2025a; Simonds & Yoshiyama, 2025; Wang et al., 2025q; Liu et al., 2025d) use explicit
+constraints or logical rules as verifiable signals, particularly effective in the domains of mathematical rea-
+soning, game play, and structured problem solving. These methods offer objective, reliable supervision but
+may require significant engineering or be limited in expressiveness.
+
+Implicit Rewards Implicit Reward frameworks hypothesize that LLMs can learn from feedback signals
+even when not explicitly labeled as rewards. For instance, “Reward Is Enough” (Song et al., 2025) demon-
+strates that LLMs can perform in-context reinforcement learning using simple scalar signals embedded in the
+context window, improving their responses over rounds without explicit RL fine-tuning or supervision. This
+reveals an inherent capacity for models to interpret and learn from implicit feedback cues present in their
+input context. Recent work has expanded this concept by showing that LLMs inherently encode reward-
+like signals through their standard training objectives. Endogenous reward (Li et al., 2025e) reveal that
+standard next-token prediction implicitly learns a generalist reward function, which can be extracted from
+model logits without additional training. Moreover, ImPlicit Self-ImprovemenT (PIT) framework (Wang
+et al., 2024i) implicitly learns the improvement goal from human preference data without extra human ef-
+forts by maximizing the quality gap of the response conditioned on a reference response. Unlike rule-based
+or environment-derived external rewards, implicit reward methods offer unique advantages by discovering
+and utilizing reward signals that are inherently present in language modeling.
+In summary, reward-based evolution provides explicit optimization and strong autonomy but remains sensi-
+tive to reward design, often trading stability and safety for adaptability and openness.
+

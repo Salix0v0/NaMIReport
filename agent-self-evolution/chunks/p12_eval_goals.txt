@@ -1,0 +1,344 @@
+7     Evaluation of Self-evolving Agents
+
+Evaluating self-evolving agents presents a unique set of challenges that extend beyond the traditional assess-
+ment of static AI systems. Unlike conventional agents typically evaluated on a fixed set of tasks at a single
+point in time, self-evolving agents are designed to continuously learn, adapt, and improve through ongoing
+interaction with dynamic environments. Consequently, their evaluation must capture not only immediate
+task success but also crucial aspects such as adaptation over time, knowledge accumulation and retention,
+long-term generalization, and the ability to transfer learned skills across sequential or novel tasks, all while
+mitigating catastrophic forgetting. This requires a fundamental shift from conventional “single-shot” scoring
+to a longitudinal, cost-aware trajectory view.
+
+7.1   Evaluation Goals, Metrics, and Benchmark Coverage
+
+To effectively evaluate self-evolving agents, we must move beyond traditional metrics and establish a com-
+prehensive framework that captures their dynamic, adaptive, and long-term learning capabilities. A truly
+capable and desirable self-evolving agent must not only learn and improve but also remember past
+knowledge, transfer it to new situations, operate sustainably, and behave responsibly. Grounded in
+these critical requirements for continuous and robust AI, we categorize the key evaluation goals into five core
+dimensions: Adaptivity, Retention, Generalization, Efficiency, and Safety, as illustrated in Table 6.
+Each dimension addresses a vital aspect of an agent’s self-evolutionary process and is assessed through its
+corresponding metrics and benchmark coverage analysis. While Table 7 provides a comprehensive catalog of
+
+
+                                                      35
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+              Evaluation Goals and Metrics                              Evaluation Paradigm
+
+                                                                                                        Long-horizon
+                                                      Static               Short-horizon
+            Adaptivity                                                                            Lifelong Learning Ability
+                                                   Assessment           Adaptive Assessment
+                                                                                                        Assessment
+
+
+
+
+                         Goal
+    Retention
+                                       Safety
+                                                External Task-Solving     Augmented Traditional
+                                                                                                     Lifelong Benchmarks
+                                                Evaluation                Benchmarks
+
+                                                                                                     Dynamic / Evolving
+                                                Internal Agent            Built-in Dynamic
+                                                                                                     Benchmarks
+                                                Components Evaluation     Benchmarks
+        Generalization          Efficiency
+
+
+
+
+Figure 9: An overview of evaluation goals and paradigms for self-evolving agents. Left: Evaluation
+Goals and Metrics. We summarize five core objectives guiding agent evaluation: adaptivity, retention,
+generalization, efficiency, and safety, which reflect how agents should evolve and perform over time. Right:
+Evaluation Paradigm. Evaluation methods are organized along an increasing temporal scale: from static
+assessment of fixed capabilities (e.g., external task-solving and component-level evaluation), to short-horizon
+adaptive assessment capturing within-task adaptation (e.g., augmented or dynamic benchmarks), and finally
+to long-horizon lifelong learning assessment that examines continual improvement under evolving or lifelong
+benchmarks. Together, these axes link the goals of self-evolution with the evaluation settings used to measure
+them, forming a unified framework for assessing agent adaptivity and sustainability. See Table 6 for metric
+definitions, Table 10 for protocol summary.
+
+
+
+evaluation resources, we synthesize these limitations to map coverage gaps across these five-goal framework
+and identify directions for trajectory-centric, cost-aware assessment at Table 8.
+
+
+7.1.1     Adaptivity
+
+Goals & Metrics Adaptivity serves as a foundational evaluation criterion for any self-evolving agent,
+measuring its ability to improve performance on in-domain tasks through experience. This dimension focuses
+on quantifying the learning curve and the extent of performance enhancement as an agent iterates and
+evolves within a specific domain. Rather than a static success rate, adaptivity is gauged over time, steps, or
+iterations. Typical metrics include the Success Rate by Iteration Steps (Hu et al., 2024c; Wang et al., 2024j;
+Zheng et al., 2025b), which tracks performance in downstream tasks as a function of the agent’s interaction
+history.
+
+
+Coverage Gaps Although adaptivity has the richest benchmark ecosystem—spanning code generation
+(SWE-bench (Jimenez et al., 2023), MLE-Bench (Chan et al., 2024)), web navigation (WebArena (Zhou
+et al., 2023), WebShop (Yao et al., 2022)), and general reasoning (GAIA (Mialon et al., 2023), Agent-
+Bench (Liu et al., 2023b) evaluations remain constrained by practical design choices. ScienceAgentBench
+limits tasks to a single programming language and imposes execution-time bounds, excluding computation-
+ally intensive scientific workflows (Chen et al., 2024e). MLE-Bench offers well-structured tasks but diverges
+from authentic research scenarios where problem formulation is itself part of the challenge (Chan et al.,
+2024). These simplifications permit controlled in-domain assessment but confine evaluation to narrow, static
+task distributions. Moreover, most benchmarks measure improvement under pre-specified learning proto-
+cols (e.g., fixed iteration budgets or predetermined replay schedules) rather than assessing whether agents
+autonomously discover effective adaptation strategies. AgentBench further reports weaknesses in sustained
+reasoning and strategic decision-making (Liu et al., 2023b), yet evaluation horizons remain limited to short-
+term improvement curves.
+
+
+                                                             36
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+7.1.2   Retention
+
+Goals & Metrics Retention is a crucial criterion for evaluating the stability of a self-evolving agent’s
+knowledge base. This dimension specifically focuses on the challenge of catastrophic forgetting, a common
+issue in lifelong learning where new knowledge acquisition erodes previously learned information, and knowl-
+edge retention within extended interactions. Two key metrics can be used to quantify this stability from
+different perspectives: Forgetting (FGT) and Backward Transfer (BWT) (Zheng et al., 2025c). Specifically,
+let Ji,t denote the performance on task i after completing t tasks:
+
+                                 t−1                                         t−1
+                             1 Xh                     i                  1 X                
+                  FGTt =               max Ji,j − Ji,t ,    BWTt =               Ji,t − Ji,i .
+                           t − 1 i=1 j∈{i,...,t}                       t − 1 i=1
+
+A positive BWT indicates that new learning positively benefits old tasks, signifying successful knowledge
+transfer and a more robust, stable learning process.
+
+Coverage Gaps Retention remains the most underserved dimension. Current memory mechanisms strug-
+gle significantly with dynamic state updates and maintaining consistency across extended interactions (Hu
+et al., 2025). Experience replay exhibits an inherent tension: while replay buffers can improve learning, scal-
+ing them beyond optimal thresholds triggers performance degradation through context overflow and resource
+exhaustion (Zheng et al., 2025b). Economic and computational constraints limit evaluation robustness, with
+some benchmarks conducting minimal repetitions that may not capture stochastic variation (Castillo-Bolado
+et al., 2024). Most critically, the overwhelming majority of existing benchmarks adopt episodic evaluation
+where agent state resets between tasks, fundamentally precluding measurement of knowledge accumulation
+or degradation—precisely the phenomena that distinguish self-evolving agents from static systems.
+
+7.1.3   Generalization
+
+Goals & Metrics While Adaptivity and Retention focus on in-domain performance, Generalization is
+a pivotal measure of a self-evolving agent’s ability to apply its accumulated knowledge to new, unseen
+domains or tasks. A truly intelligent agent should not only perform well within its familiar territory but also
+demonstrate a capacity for cross-domain generalization. This capability can be evaluated by assessing an
+agent’s performance on a diverse set of tasks that span multiple task distributions and domains. Common
+approaches include computing aggregate performance metrics (e.g., mean success rates) across multi-domain
+test suites (Liu et al., 2023b; Sun et al., 2023), and conducting out-of-domain evaluations using held-out task
+distributions that simulate real-world novelty scenarios (Hu et al., 2024b; Peng et al., 2025).
+
+Coverage Gaps Generalization is typically evaluated through multi-domain test suites (AgentBench (Liu
+et al., 2023b), TheAgentCompany (Xu et al., 2024b) and held-out task distributions, measuring an agent’s
+ability to transfer knowledge across domains. Current evaluations, however, rely on static snapshots: agents
+are tested once on diverse tasks without tracking whether cross-domain transfer degrades as they evolve
+over extended learning trajectories. Technological progress further reduces the discriminative power of older
+tasks, as modern agents benefit from algorithmic advances unavailable to earlier systems (Chan et al., 2024),
+while training data contamination complicates cross-domain assessment (Chan et al., 2024). No existing
+benchmark examines whether agents preserve generalization breadth as they specialize within domains, or
+whether knowledge acquired in one domain continues to transfer after hundreds of learning episodes.
+
+7.1.4   Efficiency
+
+Goals & Metrics Efficiency quantifies the resourcefulness of a self-evolving agent during its learning and
+operation. As agents operate continuously and make decisions autonomously, it is essential to evaluate the
+cost and speed of their evolutionary process.
+These metrics in Table 5 are particularly important for practical, real-world applications where resources
+like computation, memory, time, and human effort are finite:
+
+
+                                                      37
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Table 5: Refined cost taxonomy and units for self-evolving agents, with Real-world example (Fan
+et al., 2025): On SWE-bench (Jimenez et al., 2024), SWE-Agent (Yang et al., 2024) + Qwen3-32B (440K
+tokens, 35 calls, 28% success) vs. GPT-4o-mini (8.1M tokens, 181 calls, 10% success)—model-scaffold synergy
+critical for efficiency.
+                            Typical
+ Dimension       Symbol                    Example Measurement                Worked Example
+                            Unit
+                                           Prompt + completion tokens         440K vs. 8.1M tokens per task;
+ Token usage     Ctoken     #tokens
+                                           per episode/step                   18× difference
+ Step count /               #turns /                                          35 vs. 181 API calls per task;
+                 Cstep                     Reasoning/interaction turns
+ latency                    rounds                                            Quality vs. quantity trade-off
+ Wall-clock                                End-to-end   elapsed    runtime    12 vs. 200+ turns per task;
+                 Ctime      #seconds
+ time                                      incl. I/O                          Simple vs. complex bugs
+ Tool/API                                  External function/environment      15 vs. 38 calls (AutoCodeRover);
+                 Ctool      #calls
+ calls                                     calls                              High-quality reasoning reduces iterations
+ Memory                     #tokens    /   Persistent memory;                 Linear growth per call; Token snowball effect
+                 Cmem
+ growth                     MB             context window expansion           amplifies invalid context
+ Human over-                #hours /       Review, labeling,      red-team;   Failed attempts: 4× cost vs. successful ones;
+                 Chuman
+ sight                      tokens         guidance tokens                    Expensive failures pattern
+
+
+
+     • Token consumption (Hu et al., 2024a): Total tokens used in reasoning, generation, and memory
+       operations
+     • Time consumption (Lu et al., 2024b): Wall-clock time required to complete tasks or reach per-
+       formance thresholds
+     • Step count (Wang et al., 2023a): Number of interaction rounds needed for task completion
+     • Tool calls: Number of external API/environment invocations, can be combined with performance
+       gains to assess Tool Productivity (TP) (Wang et al., 2025h), formulated as:
+                                                                 ∆score
+                                                   TP$ = P                    .
+                                                               i cost(tooli )
+
+     • Memory growth: Expansion of persistent memory and context window over the agent’s operational
+       duration
+     • Human oversight: Time and effort required for human intervention, including review, labeling,
+       and corrective guidance
+
+To relate efficiency to performance gains, we report Cost-per-Gain (CPG) as:
+
+                                                      Total Costt
+                                       CPGt =                          ,
+                                                 Performance Gaint + ϵ
+
+where cost can be measured in tokens, time, memory, human effort, or a normalized composite (e.g., monetary
+cost), and performance gain is the improvement over baseline at horizon t. Lower CPG indicates more efficient
+learning.
+
+Coverage Gaps Efficiency suffers from sparse and inconsistent reporting of evolution costs. While bench-
+mark papers occasionally document aggregate resource consumption during evaluation (Chan et al., 2024),
+they rarely decompose costs into evolution-specific components: tokens consumed during self-reflection or
+experience replay, wall-clock time spent on architecture search or memory updates, tool invocations trig-
+gered by autonomous exploration. Cost constraints in human baseline collection (Xu et al., 2024b) reflect
+
+
+                                                        38
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+broader accessibility challenges but do not illuminate the efficiency of the evolution process itself. More
+fundamentally, standard evaluation protocols permit unconstrained optimization—agents maximize task
+success without facing the hard token budgets, iteration limits, or latency constraints that govern real-world
+deployment.
+
+7.1.5   Safety
+
+Goals & Metrics From the perspective of self-evolving, the Safety domain critically examines whether
+these agents develop unsafe or undesirable behavioral patterns throughout their continuous evolution. This
+dimension assesses an agent’s adherence to predefined rules and its propensity for harmful actions. Key
+metrics in evaluating safety of self-evolving agents may include: (1) Safety Score (Zhang et al., 2024i),
+which measures the proportion of test cases where the agent’s behavior is labeled “safe”; (2) Harm Score
+(Andriushchenko et al., 2024), computed via a detailed manually written grading rubric where outputs earn
+partial credit whenever some but not all harmful criteria are triggered; (3) Completion Under Policy (CuP)
+(Levy et al., 2024), which assesses whether an agent successfully completes a task while strictly adhering
+to a given set of rules or policies; (4) Risk Ratio (Levy et al., 2024), which calculates the frequency of an
+agent’s rule violations along a specific dimension, providing a quantitative measure of non-compliance; (5)
+Refusal Rate (Zhang et al., 2024b; Andriushchenko et al., 2024), which evaluates the proportion of tasks an
+agent refuses to perform due to their aggressive, malicious, or otherwise unsafe nature; (6) Leakage Rate
+(Shao et al., 2024a), which tracks how often an agent unintentionally leaks sensitive or private information.
+
+Coverage Gaps Safety evaluation predominantly captures risks in isolated episodes. Agent-SafetyBench
+identifies two core deficiencies: inadequate robustness when deploying tools across varied contexts, and
+limited recognition of potential hazards in specific operational scenarios (Zhang et al., 2024i). In multi-agent
+settings, SwarmBench reveals fundamental coordination challenges where local interactions fail to produce
+coherent collective strategies, with agents unable to maintain shared situational understanding necessary for
+safe collaborative operation (Ruan et al., 2025). Yet no benchmark tracks safety trajectories over extended
+evolution—whether risks accumulate through repeated exposure to edge cases, or whether unsafe behaviors
+emerge through autonomous exploration and self-directed learning.
+
+7.1.6   Self-Directedness and Evaluation Trade-offs
+
+A defining characteristic of self-evolving agents is their capacity for autonomous exploration and self-directed
+evolution, distinguishing them from passive learning paradigms. The degree of self-directedness, specifically
+whether the agent autonomously generates tasks and evolution strategies or follows externally provided
+curricula, creates fundamental trade-offs across evaluation dimensions.
+Highly self-directed systems demonstrate substantial performance gains through autonomous curriculum
+generation. WebRL improved from 4.8% to 42.4% by self-generating tasks from exploration failures (Qi
+et al., 2024), while SEAgent achieved 23.2 percentage point improvements, advancing from 11.3% to 34.5%
+via autonomous software exploration and curriculum evolution (Sun et al., 2025c). However, autonomous
+evolution incurs measurable risks. Alignment faking rates escalated from 12% to 78% when agents au-
+tonomously evolved under conflicting objectives (Greenblatt et al., 2024), illustrating safety challenges when
+evolution proceeds with minimal external oversight.
+Despite these documented impacts, the field lacks standardized metrics for quantifying self-directedness in
+evolution. To enable fair comparison, we recommend transparently reporting three aspects of the evolu-
+tion process. (1) specify whether evolution strategies and task sequences are predetermined, procedurally
+sampled, or autonomously generated by the agent; (2) Document the source of feedback signals, indicat-
+ing whether they come from external human labels, rule-based evaluators, or self-generated reflection; (3)
+Report the frequency of external interventions in the evolution process. Clearly documenting the degree of
+autonomous control is essential for interpreting performance claims, as gains may reflect true self-evolution
+capability or extensive external guidance.
+Such trajectory-centric evaluation aligns with the core objective of assessing self-evolving agents: measuring
+not just what they achieve, but how autonomously they learn to evolve.
+
+
+                                                      39
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                   Table 6: Overview of Agent Evaluation Metrics Across Core Dimensions
+ Goal             Metric                                         Description
+
+                  Success Rate by Iteration Steps (Hu et al.,
+                                                                 Performance in downstream tasks as a function of the agent’s
+                  2024c; Wang et al., 2024j; Zheng et al.,
+ Adaptivity                                                      interaction history
+                  2025b)
+                                                                 How quickly an agent reaches a certain performance threshold
+                  Adaptation Speed (Wang et al., 2023a)          or converges to an optimal strategy within a given adaptation
+                                                                 period
+
+                                                                 The average accuracy drop on old tasks after an agent learns
+                  Forgetting (FGT) (Zheng et al., 2025c)         a new one, measuring whether useful experience is successfully
+ Retention                                                       maintained
+                  Backward Transfer (BWT) (Zheng et al.,         The average accuracy improvement on old tasks due to the
+                  2025c)                                         experience gained from new tasks
+
+                  Aggregate Performance (Liu et al., 2023b;      Mean success rates or other performance indicators across
+ Generalization   Sun et al., 2023)                              multi-domain test suites to gauge overall proficiency
+                  Out-of-Domain (OOD) Performance (Hu
+                                                                 The agent’s performance in held-out task distributions
+                  et al., 2024b; Peng et al., 2025)
+
+                  Token Consumption (Hu et al., 2024a)           Computational overhead in reasoning and generation steps
+                  Time Expenditure (Lu et al., 2024b)            Total duration required for task completion
+ Efficiency       Number of Steps (Wang et al., 2023a)           Minimal actions needed to accomplish objectives
+                                                                 The ratio between task benefit (e.g., answer accuracy) and tool
+                  Tool Productivity (Wang et al., 2025h)
+                                                                 usage cost (e.g., number of tool calls)
+
+                                                                 Proportion of test cases where agent behavior meets predefined
+                  Safety Score (Zhang et al., 2024i)
+                                                                 safety criteria
+                                                                 Graded assessment of harmful outputs based on violation
+                  Harm Score (Andriushchenko et al., 2024)
+ Safety                                                          severity
+                  Completion Under Policy (CuP) (Levy
+                                                                 Task success rate while complying with specified constraints
+                  et al., 2024)
+                  Risk Ratio (Levy et al., 2024)                 Frequency of policy violations per interaction opportunity
+                  Refusal Rate (Zhang et al., 2024b; An-
+                                                                 Percentage of tasks declined due to safety concerns
+                  driushchenko et al., 2024)
+                  Leakage Rate (Shao et al., 2024a)              Incidence of unintended sensitive information disclosure
+
+
+

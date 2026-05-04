@@ -1,0 +1,133 @@
+3   What to Evolve?
+
+A self-evolving agent differs from a static agent not by what components it contains, but by which in-
+ternal states can be autonomously modified based on its own trajectories, reflections, and feedback sig-
+nals. Thus, the key question of this section is to identify the evolutionary loci within an agent system
+Π = (Γ, {ψi }, {Ci }, {Wi })—the parts of the system whose states can be rewritten in an experience-driven
+and persistent manner, enabling cumulative self-improvement.
+Following the formulation in Section 2.1, these evolutionary loci align with four major pillars of an agent
+system. Our investigation starts at the agent’s cognitive core, namely the Models {ψi }, whose parameters
+can be continuously updated through self-generated supervision, execution traces, or environmental feedback
+(Zhou et al., 2025e; Wang et al., 2025q). We then consider the Context {Ci } –including instructions (Xiang
+et al., 2025; Khattab et al., 2023) and long-term memory (Chhikara et al., 2025; Wang et al., 2024j) –which
+evolves as agents reflect, store, and retrieve experience in ways that shape future decision-making. From this
+internal foundation, we examine the evolution of Tools {Wi }, where agents autonomously create (Qiu et al.,
+2025b), refine (Qu et al., 2025), and managing (Wang et al., 2025k) executable skills based on verifiable
+interaction signals Finally, we scale to the Agentic Architecture, where the system’s architecture (Hu
+et al., 2024c; Zhang et al., 2024c) and collaborative structures (Wan et al., 2025) are optimized over time,
+enabling structural adaptation beyond individual components. We present representative examples of these
+evolutionary loci in Table 2.
+
+
+                                                      9
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Table 2: Representative self-evolving agent methods positioned along four evolutionary pillars; a filled bullet
+(•) marks dimensions where the approach actively evolves.
+      Method                                               Model                  Context                   Tool                 Architecture
+                                                  Policy    Experience    Prompt      Memory    Creation   Mastery   Selection   Single   Multi
+      SCA(Zhou et al., 2025e)                       •              •          ◦             ◦      •          ◦         ◦          ◦       ◦
+      RAGEN(Wang et al., 2025q)                     •              •          •             ◦      ◦          ◦         ◦          •       ◦
+      AgentGen (Hu et al., 2024b)                   ◦              •          •             •      •          ◦         ◦          •       ◦
+      Promptbreeder(Fernando et al., 2023)          ◦              ◦          •             ◦      ◦          ◦         ◦          •       ◦
+      Expel(Zhao et al., 2024a)                     ◦              •          ◦             •      ◦          ◦         ◦          ◦       ◦
+      Agent Workflow Memory(Wang et al., 2024j)     ◦              ◦          ◦             •      ◦          ◦         •          ◦       ◦
+      Mem0(Chhikara et al., 2025)                   ◦              ◦          ◦             •      ◦          ◦         ◦          ◦       ◦
+      MAS-Zero(Ke et al., 2025)                     ◦              ◦          •             ◦      ◦          ◦         ◦          ◦       •
+      Multi-Agent Design(Zhou et al., 2025a)        ◦              ◦          •             ◦      ◦          ◦         •          ◦       •
+      SPO(Xiang et al., 2025)                       ◦              ◦          •             ◦      ◦          ◦         ◦          ◦       ◦
+      Alita(Qiu et al., 2025b)                      ◦              ◦          ◦             ◦      •          ◦         •          ◦       ◦
+      TextGrad(Yellamraju et al., 2024)             ◦              ◦          •             ◦      ◦          •         •          •       ◦
+      DGM(Zhang et al., 2025h)                      ◦              ◦          •             ◦      ◦          ◦         ◦          •       ◦
+      AlphaEvolve(Novikov et al., 2025)             ◦              ◦          •             ◦      •          •         ◦          •       ◦
+      ADAS(Hu et al., 2024c)                        ◦              ◦          •             ◦      •          ◦         ◦          •       •
+      AFlow(Zhang et al., 2024c)                    ◦              ◦          •             ◦      •          ◦         •          •       •
+      ReMA(Wan et al., 2025)                        ◦              ◦          ◦             ◦      ◦          ◦         ◦          ◦       •
+      SkillWeaver(Zheng et al., 2025a)              ◦              ◦          ◦             •      •          •         •          ◦       ◦
+      LearnAct(Zhao et al., 2024b)                  ◦              ◦          ◦             •      •          ◦         •          ◦       ◦
+      DRAFT(Qu et al., 2025)                        ◦              ◦          •             ◦      •          •         ◦          ◦       ◦
+      ToolGen(Wang et al., 2025k)                   ◦              ◦          ◦             •      •          •         ◦          ◦       ◦
+      CRAFT(Yuan et al., 2024a)                     ◦              ◦          ◦             ◦      •          •         •          ◦       ◦
+      CREATOR(Qian et al., 2023b)                   ◦              ◦          ◦             ◦      •          •         ◦          ◦       ◦
+      Voyager(Wang et al., 2023a)                   ◦              ◦          •             •      •          •         •          ◦       •
+
+
+
+
+3.1   Models
+
+Models constitute a primary locus of self-evolution, as their parameters can be autonomously rewritten based
+on the agent’s own trajectories, reflections, and interaction outcomes. The ability of these models to evolve
+by continually adapting their internal parameters and expanding their functional capabilities is essential for
+the development of autonomous, general-purpose agents. Unlike static systems that rely heavily on human-
+annotated datasets and fixed training regimes, self-evolving models can improve through interaction, self-
+supervised data generation, and dynamic learning loops, thereby achieving greater efficiency, adaptability,
+and scalability.
+In detail, we outline the principal axes along which model evolution unfolds. These include learning from
+self-generated supervision to refine model weights, evolving through interaction with constructed or external
+environments, and integrating feedback signals that directly reshape future reasoning behaviors. Together,
+these strategies represent a shift from passive learning paradigms toward active self-improvement.
+
+Policy A self-evolving agent can refine its parameters to perform better on targeted tasks. Traditional
+methods of data collection for training agents on tool-use benchmarks are costly and often yield limited
+coverage, while purely synthetic data-generation pipelines typically suffer from inadequate quality. Con-
+sequently, recent studies emphasize enabling agents to autonomously generate data to improve their own
+model weights. One representative approach is the Self-Challenging Agent (SCA)(Zhou et al., 2025e), where
+a language model alternates roles between a challenger generating executable Code-as-Task problems and
+an executor solving them. The model then fine-tunes its parameters using trajectories derived from suc-
+cessful solutions, resulting in significant performance gains on complex, multi-step tasks. Similarly, the
+Self-Rewarding Self-Improving framework(Simonds et al., 2025) implements an internal self-judging mecha-
+nism, allowing the model to autonomously generate problems, solve them, and assess its performance, thus
+producing self-contained fine-tuning data without external annotations. This method demonstrated notable
+improvements, particularly in complex reasoning tasks. Beyond task creation, another promising research
+direction involves leveraging interaction feedback directly for parameter updates. For instance, SELF(Lu
+et al., 2023), SCoRe(Kumar et al., 2024), and PAG(Jiang et al., 2025b) interpret execution traces or natural-
+language critiques as reward signals within an online Supervised Fine-Tuning (SFT) combined with Rein-
+forcement Learning (RL) framework, enabling continuous policy improvement. TextGrad(Yellamraju et al.,
+2024) further extends this concept by treating unstructured textual feedback as a differentiable training sig-
+
+
+                                                                         10
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+nal capable of directly influencing both prompt design and model parameters. Additionally, AutoRule(Wang
+& Xiong, 2025) converts language-model reasoning traces and preference feedback into explicit rule-based
+training rewards, enhancing the quality of model outputs through structured reward signals. Collectively,
+these advancements chart a clear trajectory—from agents autonomously crafting their training tasks to di-
+rectly refining their parameters based on execution feedback, highlighting the capacity of models to evolve
+continuously by learning from the data they produce.
+
+Experience Agents can evolve not only by adjusting their internal parameters but also by actively in-
+teracting with or even constructing their environments, capturing experiences, and transforming them into
+learning signals that drive iterative improvement. This environmental loop provides agents with the com-
+plexity and diversity required for scalable self-adaptation. The Self-Challenging Agent (SCA)(Zhou et al.,
+2025e) exemplifies this dynamic at the task level, where the agent autonomously generates novel Code-as-
+Task problems, executes them, and then filters successful trajectories for retraining itself. AgentGen(Hu
+et al., 2024b) extends this concept to full-environment generation, synthesizing diverse simulation worlds
+(in PDDL or Gym-style formats) derived from an initial corpus. It implements a bidirectional evolution
+loop that progressively adjusts task difficulty, enabling the agent to continuously grow within a dynamically
+structured curriculum. Reflexion(Shinn et al., 2023) complements this by introducing self-reflective mech-
+anisms, where agents iteratively record natural-language critiques of their previous actions, guiding future
+behavior to avoid recurring mistakes. Additionally, AdaPlanner(Sun et al., 2023) introduces closed-loop
+adaptive planning, allowing agents to refine their strategies on-the-fly based on environmental feedback,
+effectively reshaping action sequences in response to immediate outcomes. Similarly, Self-Refine(Madaan
+et al., 2023b) employs an iterative refinement loop in which the agent repeatedly critiques and revises its
+initial outputs, significantly improving task accuracy without explicit retraining. SICA (Self-Improving
+Coding Agent)(Robeyns et al., 2025b) further pushes the boundary by enabling agents to autonomously
+edit their underlying code and tools, iteratively enhancing their core reasoning abilities through direct self-
+modification. From a reinforcement learning perspective, frameworks such as RAGEN(Wang et al., 2025q)
+and DYSTIL(Wang et al., 2025c) conceptualize multi-step tool-use tasks as Markov Decision Processes, op-
+timizing agent policies through rich environmental rewards and strategy induction loops. RAGEN leverages
+dense feedback from the environment to iteratively fine-tune action policies, while DYSTIL utilizes high-level
+strategy advice generated by language models to progressively internalize complex decision-making skills into
+reinforcement learning agents. Collectively, these approaches highlight a compelling paradigm where self-
+evolving agents not only leverage self-generated data but actively reshape their environments and internal
+mechanisms to fuel ongoing learning. Such dynamic interaction loops point toward autonomous, open-ended
+improvement cycles deeply grounded in experiential adaptation.
+

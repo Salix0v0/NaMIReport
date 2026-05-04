@@ -1,0 +1,116 @@
+3.4     Architecture
+
+The defining feature of next-generation agentic systems is their intrinsic capacity for self-improvement. This
+marks a fundamental shift from systems with fixed capabilities to those that can autonomously enhance
+their performance(Liu et al., 2025b). By treating their own internal logic and collaborative structures
+as optimizable components, these systems can adapt their behavior and design in response to feedback,
+achieving a level of efficiency and effectiveness that static designs cannot match. This section details how
+this self-optimization is realized, first by examining improvements within single-agent systems and then by
+exploring the co-evolution of complex multi-agent systems.
+
+3.4.1    Single-Agent System Optimization
+
+LLM-Invoking Node Optimization Optimizing a single LLM call is straightforward in isolation, but
+within an agentic system, it becomes a difficult credit assignment problem, as the effect of any single change
+is obscured by subsequent steps. Research addresses this by making node-level components optimizable,
+following two main strategies. The first focuses on refining nodes within a fixed agentic topology. A prime
+example is TextGrad (Yellamraju et al., 2024), which, inspired by backpropagation, uses "textual gradients"
+to propagate feedback from the final output backward through the workflow, guiding systematic, local
+
+
+                                                      14
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+refinements at each node without altering the system’s overall structure. The second, parallel strategy
+integrates this component-level optimization directly into the search for the system’s architecture itself.
+Under this approach, node characteristics become tunable parameters in a larger search space. For instance,
+frameworks can embed prompt engineering directly into the search loop, allowing the system to discover not
+just the optimal workflow but also the most effective instruction for each agent simultaneously (Zhou et al.,
+2025a). Similarly, EvoFlow (Zhang et al., 2025c) uses evolutionary algorithms to construct heterogeneous
+workflows by selecting the most suitable LLM for each task from a diverse pool. This holistic strategy enables
+the discovery of systems that are co-optimized for both their structure and individual agent capabilities,
+effectively balancing metrics like overall performance and cost (Ye et al., 2025a).
+
+Autonomous-Agent Optimization Building upon the optimization of individual LLM-invoking nodes,
+a more profound level of self-improvement targets the autonomous agent as a holistic entity. This evolution
+proceeds along two main fronts: optimizing the agent’s high-level architectural design and enabling the agent
+to directly modify its own source code. The first approach focuses on discovering the optimal agent structure.
+AgentSquare (Shang et al., 2025) exemplifies this by defining a modular design space of components like
+planners and memory modules, then using an evolutionary algorithm to find the most effective combination
+for a given task. The second front involves agents that dynamically rewrite their own operational code. This
+is seen in radical systems like the Darwin Gödel Machine (Zhang et al., 2025h), which recursively modifies
+its own Python codebase, and AlphaEvolve (Novikov et al., 2025), which uses evolutionary coding to im-
+prove specific algorithms. Similarly, Gödel Agent (Yin et al., 2025) provides a self-referential framework for
+agents to analyze and alter their logic. Together, these two directions (optimizing the agent’s architectural
+“blueprint” and its functional code) demonstrate a key trend toward turning the agent’s fundamental struc-
+ture and logic into learnable components. MemEvolve (Zhang et al., 2025g) introduces a meta-evolutionary
+framework that evolves not just the agent’s experiential memory, but the memory system’s architecture it-
+self. Through a bilevel optimization process, it adapts the mechanisms for encoding, storing, and retrieving
+information to better suit specific task domains.
+
+3.4.2   Multi-Agent System Optimization
+
+How agents are organized and communicate within a system (its topology) fundamentally determines its ca-
+pacity for solving complex problems. The field has evolved from using fixed, human-designed communication
+structures to creating dynamic systems that automatically adapt their organization to a given task, allowing
+them to discover and exploit the most effective collaboration patterns. This evolution is explored along two
+major fronts: the optimization of static, explicit workflows and the co-evolution of dynamic, internal policies.
+
+Agentic Workflow Optimization The optimization of agentic workflows focuses on finding the most
+effective, often static, structure of communication and task delegation for a given problem. Early research
+established important foundations, with studies like AutoFlow (Li et al., 2024d) demonstrating the automated
+creation of linear workflows from natural language, and GPTSwarm (Zhuge et al., 2024) proposing a unifying
+graph-based framework. Concurrently, other foundational work explored how agents could evolve by using
+symbolic learning to distill their interaction experiences into an explicit, interpretable set of logical rules to
+guide future decisions (Zhou et al., 2024b). This abstraction of systems into tunable components—whether
+nodes, edges, or symbolic rules—was crucial. However, these early systems often lacked a formal method for
+efficiently navigating the vast space of possible configurations and interactions.
+The major breakthrough came when ADAS (Hu et al., 2024c) and AFlow (Zhang et al., 2024c) formally
+defined this challenge as a search and optimization problem. ADAS set a theoretical vision by framing
+system design as a search through a Turing-complete space of code-based configurations. Building on this,
+AFlow made it practical by introducing reusable operators that represent common agentic patterns and by
+employing Monte Carlo Tree Search (MCTS) to efficiently navigate the enormous design space. Together,
+these works established a core methodology for treating agent system design as a tractable optimization
+problem, proving that automatically discovered workflows could outperform human-designed ones.
+Following this formalization, research rapidly diversified toward creating customized agent systems for each
+specific query. Two primary strategies emerged: search-based and learning-based generation. Search-based
+
+
+                                                       15
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+methods, such as MaAS (Zhang et al., 2025d), create a "supernet" of potential architectures and then
+sample a specialized system from it. In parallel, learning-based methods train models to generate effective
+topologies directly. ScoreFlow (Wang et al., 2025n), for instance, trains a generator using a novel preference
+optimization method, while FlowReasoner (Gao et al., 2025) uses reinforcement learning to train a meta-
+agent that constructs a bespoke workflow on the fly. This line of query-specific generation continues to be
+an active area of research (Ye et al., 2025b; Ke et al., 2025). Furthermore, it is important to note that this
+process is not limited to the topology alone; many of these frameworks also perform node-level optimization
+in tandem, such as co-optimizing prompts or selecting heterogeneous models as an integral part of the
+architectural generation process (Zhang et al., 2024c; Zhou et al., 2025a; Zhang et al., 2025c).
+A key challenge for all search and learning methods is the computational cost of evaluating each potential
+workflow (Shang et al., 2025). To address this, researchers have developed lightweight prediction models.
+Agentic Predictor (Trirat et al., 2025) is a prime example, training a model to accurately estimate a workflow’s
+performance based on its structural and semantic features without a full execution. By providing a fast and
+inexpensive evaluation proxy, these predictors significantly accelerate the optimization process, making the
+exploration of vast design spaces feasible (Zhang et al., 2025s).
+
+Multi-Autonomous-Agent Optimization Distinct from optimizing a system’s explicit workflow struc-
+ture, this line of research focuses on how multiple autonomous agents can co-evolve their internal behavioral
+policies through interaction. This approach enables emergent capabilities like coordination, task delegation,
+and beneficial competition. For instance, ReMA (Wan et al., 2025) uses multi-agent reinforcement learning
+(MARL) to collaboratively train a high-level meta-thinker and a low-level executor, significantly improv-
+ing performance on reasoning benchmarks. Building on this, GiGPO (Feng et al., 2025b) enhances MARL
+training by aggregating trajectories to provide more precise credit assignment, boosting success rates on
+long-horizon tasks. To support this direction, platforms like MARTI (Liao et al., 2025) provide open-source
+infrastructure for orchestrating and scaling the training of these language-model collectives. Collectively,
+these studies underscore multi-agent reinforcement learning as a promising route for cultivating group-level
+competencies unattainable by individual agents alone.
+
+

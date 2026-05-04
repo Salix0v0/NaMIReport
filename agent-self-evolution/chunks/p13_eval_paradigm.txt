@@ -1,0 +1,440 @@
+7.2     Evaluation Paradigm
+
+The evaluation of self-evolving agents, given their continuous learning paradigm, necessitates a multi-faceted
+approach that extends beyond traditional static assessments. Current evaluation paradigm can be broadly
+categorized based on the temporal scope of the assessment: Static Assessment, Short-horizon Adaptive
+Assessment, and Long-horizon Lifelong Learning Ability Assessment. Each category addresses
+different aspects of an agent’s evolving capabilities, from its instantaneous performance to its long-term
+learning trajectory. Terminology note. Here, “continuous” refers to system-level self-evolution (changes in
+policies, memories, skills, tools, or procedures across episodes), not necessarily model-parameter continual
+learning. Our evaluation therefore traces trajectories across interaction episodes and evolving environments,
+independent of whether weights are updated.
+
+7.2.1     Static Assessment
+
+Static assessment evaluates the instantaneous performance of self-evolving agents at a specific point in
+time. Although these agents are designed for continuous improvement, static methods remain crucial for
+establishing baseline performance, comparing different agent architectures on fixed task sets, or evaluating
+capabilities after discrete training phases. This approach aligns with conventional AI evaluation, focusing
+on immediate performance in fixed environments. While useful for assessing generalization in an “in-domain
+
+
+                                                                40
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                          Table 7: Representative Benchmarks for Evaluating Self-Evolving Agents
+   Benchmark Name                            Task Domain                 Goal                         Core Metrics                       Task Quantity      Temporal Scope
+                                                                                                      Valid Execution Rate, Success
+   ScienceAgentBench(Chen        et   al.,
+                                             Scientific Data Analysis    Adaptivity, Efficiency       Rate, CodeBERTScore, API           102                Static
+   2024e)
+                                                                                                      Cost
+   MLE-Bench(Chan et al., 2024)              ML-Engineering              Adaptivity                   –                                  75                 Static
+                                                                                                      Task Success Rate, Cost, In-
+   DS-Bench(Jing et al., 2025)               Data Science                Adaptivity                   ference Time, Competition-level    540                Static
+                                                                                                      Accuracy
+   SWE-bench(Jimenez et al., 2023)           Software Engineering        Adaptivity                   Pass Rate                          2,294              Static
+   OSWorld(Xie et al., 2024)                 Computer-Use / GUI          Adaptivity                   Success Rate                       369                Static
+                                                                                                      Action Accuracy, Reflection Ac-
+   Mobile-Eval-E(Wang et al., 2025o)         Computer-Use / GUI          Adaptivity, Efficiency                                          25                 Static, Short-horizon
+                                                                                                      curacy, Termination Error
+   WebShop(Yao et al., 2022)                 Web Search / Browse         Adaptivity                   Success Rate                       12,087             Static
+   WebArena(Zhou et al., 2023)               Web Search / Browse         Adaptivity                   Success Rate                       812                Static
+   WebWalkerQA(Wu et al., 2025)              Web Search / Browse         Adaptivity, Efficiency       Accuracy, Action Count             680                Static
+   ST-WebAgentBench(Levy et al.,
+                                             Web Search / Browse         Safety                       Completion under Policy            235                Static
+   2024)
+   xbench(Chen et al., 2025f)                Web Search / Browse         Adaptivity                   LLM-Judge Score                    100                Static
+   BrowseComp(Wei et al., 2025b)             Web Search / Browse         Adaptivity                   Accuracy                           1,266              Static
+   Agent-SafetyBench(Zhang et al.,
+                                             General                     Safety                       Safety Score                       20,000             Static
+   2024i)
+   LifelongAgentBench(Zheng et al.,                                      Adaptivity,     Retention,
+                                             General                                                  Success Rate                       1396               Long-horizon
+   2025b)                                                                Generalization
+                                                                         Adaptivity,    Generaliza-   Success Rate, F1, Reward, Game
+   AgentBench(Liu et al., 2023b)             General                                                                                     1360               Static
+                                                                         tion                         Progress
+   GAIA(Mialon et al., 2023)                 General                     Adaptivity                   Accuracy                           466                Static
+   TheAgentCompany(Xu        et       al.,                                                            Completion Score, Steps, Cost
+                                             General                     Adaptivity, Efficiency                                          175                Static
+   2024b)                                                                                             per Instance
+                                                                                                      Accuracy, Slope, Position of 1st
+   EvaLearn(Dou et al., 2025)                General                     Adaptivity, Efficiency       solution, Num of consecutive so-   648                Long-horizon
+                                                                                                      lutions
+   PlanBench(Valmeekam et al., 2023)         Planning                    Adaptivity                   Accuracy                           ∼26,250            Static, Short-horizon
+   Natural Plan(Zheng et al., 2024a)         Planning                    Adaptivity                   Exact Match                        3,600              Static
+                                                                         Adaptivity,   Generaliza-
+   ACPBench(Kokel et al., 2025)              Planning                                                 Accuracy                           3,720              Static
+                                                                         tion
+   AppBench (Wang et al., 2024b)             Planning                    Adaptivity                   Success Rate, F1                   800                Static
+   ToolBench(Qin et al., 2023)               Tool Usage                  Adaptivity                   Pass Rate, Win Rate                126,486            Static
+   ToolSandbox(Lu et al., 2024a)             Tool Usage                  Adaptivity                   Similarity Score                   1,032              Static
+   Seal-Tools(Wu et al., 2024)               Tool Usage                  Adaptivity                   Accuracy, P/R/F1                   14,076             Static
+   API-Bank(Li et al., 2023)                 Tool Usage                  Adaptivity                   Accuracy, ROUGE                    4,125              Static
+   T-Eval(Chen et al., 2023)                 Tool Usage                  Adaptivity                   Domain-Specific Score              23,305             Static
+   τ -Bench(Yao et al., 2024)                Tool Usage                  Adaptivity                   Pass^k                             165                Static
+   AceBench(Chen et al., 2025a)              Tool Usage                  Adaptivity                   Accuracy                           2,000              Static
+   LTMBenchmark(Castillo-Bolado                                                                       Score, Accuracy, GoodAI LTM
+                                             Agent Memory                Retention, Efficiency                                           30                 Long-horizon
+   et al., 2024)                                                                                      Score, Speed, Cost, Verbosity
+                                                                                                      Accuracy, First-Try Accuracy,
+                                                                                                      Longest Corr, Retry Count,         311 scene nodes,   Short-horizon,      Long-
+   StoryBench(Wan & Ma, 2025)                Agent Memory                Retention, Efficiency
+                                                                                                      Runtime Cost, Token Consump-       86 choice nodes    horizon
+                                                                                                      tion
+                                                                                                      SubEM, Recall, ROUGE F1, Ac-
+   MemoryAgentBench(Hu          et    al.,
+                                             Agent Memory                Adaptivity                   curacy, Recall@5, Model-based      2200               Static, Short-horizon
+   2025)
+                                                                                                      Acc/F1
+                                                                                                      KPI, Text-Based Score, Commu-
+   MultiAgentBench(Zhu et al., 2025)         Multi-Agent Collaboration   Adaptivity                   nication Score, Planning Score,    100                Static
+                                                                                                      Coordination Score
+   SwarmBench(Ruan et al., 2025)             Multi-Agent Collaboration   Adaptivity                   Perspective-specific Metrics       5                  Short-horizon
+
+
+
+
+evolving, out-of-domain evaluation” paradigm, static assessment inherently does not capture the dynamic,
+continuous learning, or long-term evolutionary aspects central to self-evolving agents.
+For evaluating an agent’s general capabilities at a given moment, standard benchmarks designed for static
+AI systems are often employed. These benchmarks offer diverse task domains and test various core agent
+competencies, providing a snapshot of an agent’s proficiency before or at specific stages of its evolution.
+These assessments can be systematically categorized into External Task-Solving Evaluation and In-
+ternal Agent Components Evaluation, where External Task-Solving Evaluation measures end-to-end
+performance in completing domain-specific or cross-domain tasks, and Internal Capability Evaluation fo-
+cuses on fundamental components in the agent, including planning, tool utilization, memory management,
+multi-agent coordination, etc.
+
+
+External Task-Solving Evaluation This category assesses an agent’s end-to-end proficiency in complet-
+ing tasks across various real-world or simulated environments. In scientific data analysis and machine
+learning engineering, benchmarks like ScienceAgentBench (Chen et al., 2024e) and MLE-Bench (Chan
+et al., 2024) test agents’ ability to generate and execute code for data analysis and solve Kaggle-style prob-
+lems. For web search/browsing, environments such as WebShop (Yao et al., 2022), WebArena (Zhou
+et al., 2023), X-WebAgentBench (Wang et al., 2025j), Mind2Web (Deng et al., 2023), and BrowseComp
+(Wei et al., 2025b) simulate realistic web interactions, complex browsing scenarios, and task completion
+
+
+                                                                                           41
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+              Table 8: Goal-to-benchmark mapping with limitations and coverage gaps.
+ Goal            Benchmarks                Limitations                                       Coverage Gaps
+                                           Restricted programming languages and exe-
+                                                                                             Open-ended        exploration
+                 SWE-bench,         We-    cution time limits (Chen et al., 2024e); Sim-
+                                                                                             without predetermined ob-
+                 bArena,     MLE-Bench,    plified problem specifications vs. authentic
+ Adaptivity                                                                                  jectives; Long-horizon adap-
+                 ScienceAgentBench,        R&D ambiguity (Chan et al., 2024); Weak
+                                                                                             tation under non-stationary
+                 GAIA                      sustained reasoning and decision-making (Liu
+                                                                                             distributions
+                                           et al., 2023b)
+                                           Persistent challenges in dynamic memory and
+                 LifelongAgentBench,       long-range consistency (Hu et al., 2025); Re-     Episodic designs reset state
+ Retention       LTMBenchmark, Memo-       play buffer trade-offs with context overflow      between tasks; No retention
+                 ryAgentBench              (Zheng et al., 2025b); Limited robustness test-   with safety constraints
+                                           ing due to costs (Castillo-Bolado et al., 2024)
+                AgentBench,    GAIA,       Progressive task obsolescence from algorith-      Temporal robustness under
+ Generalization TheAgentCompany,           mic advances (Chan et al., 2024); Training        distribution drift; Adversarial
+                MLE-Bench                  data contamination risks (Chan et al., 2024)      co-evolutionary assessment
+                                           High resource demands limit accessibility         No enforced budgets dur-
+                 MLE-Bench,    TheAgent-
+ Efficiency                                (Chan et al., 2024); Cost constraints prevent     ing evolution; Multi-objective
+                 Company
+                                           baseline collection (Xu et al., 2024b)            constraints absent
+                                                                                             Static evaluation only; No
+                                           Inadequate tool robustness and risk awareness
+                 Agent-SafetyBench,                                                          long-horizon safety drift
+ Safety                                    (Zhang et al., 2024i); Local-global coordina-
+                 SwarmBench                                                                  tracking;    Co-evolutionary
+                                           tion disconnect (Ruan et al., 2025)
+                                                                                             safety unexplored
+
+
+
+under security constraints. In software engineering, the SWE-bench series (Jimenez et al., 2023; Ope-
+nai, 2024; Aleithan et al., 2024; Yang et al., 2024) uses real GitHub issues to assess agents’ code repair
+capabilities. For computer-use interactions, OSWorld (Xie et al., 2024) offers a unified environment
+for open-ended tasks involving various desktop and web applications. Specialized domains like marketing
+also feature benchmarks such as xbench (Chen et al., 2025f). Beyond specific domains, generalist agent
+benchmarks like AgentBench (Liu et al., 2023b), GAIA (Mialon et al., 2023), and TheAgentCompany (Xu
+et al., 2024b) evaluate broad problem-solving abilities across multiple knowledge domains and professional
+tasks, simulating real-world demands on general AI assistants.
+
+Internal Agent Components Evaluation Beyond end-to-end task completion, assessing an agent’s
+underlying core competencies is crucial. These benchmarks evaluate fundamental capabilities that contribute
+to an agent’s overall intelligence and self-evolutionary potential. As for Planning, benchmarks such as
+PlanBench (Valmeekam et al., 2023), Natural Plan (Zheng et al., 2024a), AutoPlanBench (Stein et al.,
+2025), and ACPBench (Kokel et al., 2025) comprehensively evaluate an agent’s ability to understand dynamic
+environments, devise strategies, decompose complex problems, and execute reasoning in various planning
+domains. For Tool Usage, simple benchmarks like ToolAlpaca (Tang et al., 2023) and ToolBench (Qin
+et al., 2023) test basic selection and parameter mapping, while more complex ones like ToolSandbox (Lu
+et al., 2024a), Seal-Tools (Wu et al., 2024), API-Bank (Li et al., 2023), T-Eval (Chen et al., 2023), τ -
+Bench (Yao et al., 2024), AceBench (Chen et al., 2025a) simulate real-world scenarios involving multi-turn
+interactions, implicit state dependencies, and nested calls. Memory Management benchmarks such as
+LTMBenchmark (Castillo-Bolado et al., 2024), MemoryAgentBench (Hu et al., 2025), and StoryBench (Wan
+& Ma, 2025) evaluate the agent’s capacity to retain and utilize information across multi-turn interactions,
+dynamic scenarios, and long-range dependencies. For evaluating Multi-Agent Collaboration, benchmarks
+such as MultiAgentBench (Zhu et al., 2025) and SwarmBench (Ruan et al., 2025) assess coordination,
+communication, and emergent swarm intelligence in both collaborative and competitive settings.
+Typical metrics for static assessment include accuracy, success rate, progress rate, completion rate, and
+various domain-specific performance indicators (e.g., CodeBertScore, Valid Execution Rate, Pass Rate, F1
+score). These metrics provide a singular performance score for an isolated invocation or a fixed set of tasks.
+
+
+                                                         42
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Table 9: Differences between Short-horizon Adaptive Assessment and Long-horizon Lifelong Learning Ability
+Assessment
+                                                                          Long-horizon Lifelong Learning Ability As-
+ Dimension          Short-horizon Adaptation Assessment
+                                                                          sessment
+                                                                          Continuous knowledge accumulation and sustained
+ Primary      Fo-   Immediate learning and incremental improvement
+                                                                          performance across diverse, evolving tasks and envi-
+ cus                within consistent or slightly varying tasks
+                                                                          ronments.
+                                                                          Mitigating catastrophic forgetting; Robust knowl-
+ Core       Chal-   Rapid adaptation to minor changes; Improving on       edge transfer; Maintaining efficiency/safety over
+ lenges             similar, repeated tasks                               time; handling true novelty and significant distribu-
+                                                                          tion shifts
+                    Small number of sequential tasks or iterations over   Large, potentially unbounded sequence of diverse,
+ Temporal
+                    a short period; Improvement on the same or similar    cross-domain tasks; Very long interaction periods re-
+ Scope
+                    task types.                                           quiring integration of new skills with old
+
+
+
+7.2.2     Short-Horizon Adaptive Assessment
+
+Short-horizon adaptations extend beyond static evaluations by assessing an agent’s ability to adapt and
+improve over a relatively short period or a limited number of interactions. The agent might improve per-
+formance on the same task instance with more attempts, or adapt to new instances of the same task type.
+This category focuses on capturing the capacity of the self-evolving agent for immediate adaptability and
+incremental learning within a relatively consistent or slightly varying task distribution. These evaluation
+schemes can be broadly categorized into two ways: (1) augment traditional benchmarks with a temporal
+dimension, and (2) specially design benchmarks and metrics that can inherently support Short-Horizon
+dynamic learning.
+
+
+Augmented Traditional Benchmarks Many studies leverage existing benchmarks but introduce a new
+dimension to track performance over time. This typically involves analyzing performance as a function of the
+number of iterations, steps, or examples. For example, ADAS (Hu et al., 2024c) evaluated the held-out test
+accuracy with the number of agent system iterations on the ARC benchmark (Chollet, 2019); AWM (Wang
+et al., 2024j) studied the cumulative success rate over the process of online evaluation under WebArena map
+test split (Zhou et al., 2023), using a number of examples to mark the evolution progress; WebEvolver (Fang
+et al., 2025b) studied the success rate with self-improving iterations under Mind2web-Live (Pan et al., 2024).
+This approach allows for tracking the Adaptivity of the agent within a confined scope.
+
+
+Benchmarks with Built-in Dynamic Evaluation Some benchmarks are designed with short-horizon
+dynamic learning in mind. MemoryAgentBench (Hu et al., 2025), for example, includes a “Test-Time Learn-
+ing” (TTL) dimension that evaluates an agent’s ability to learn new tasks directly from conversation within
+a single interaction session. In practice, TTL is evaluated through two types of tasks: Multi-Class Classifica-
+tion and Recommendation. In these settings, the agent must utilize previously provided information—such
+as labeled examples in context or a long movie-related dialogue history—to perform new tasks like map-
+ping sentences to class labels or recommending relevant movies. This assesses immediate adaptation and
+knowledge acquisition during ongoing interaction.
+
+
+Metrics and Methods for Evaluating Short-Horizon Adaptations The primary metrics and meth-
+ods for short-horizon adaptations are designed to quantify Adaptivity. These include: (1) Success Rate
+by Iteration Steps (Hu et al., 2024c; Wang et al., 2024j; Zheng et al., 2025b), which tracks performance
+improvements as the agent interacts more with the environment or attempts a task multiple times; (2)
+Learning Curve Analysis, which visualizes how performance (e.g., success rate, accuracy) changes over a lim-
+ited number of training steps, episodes, or interactions (Hu et al., 2024c; Wang et al., 2024j); (3) Adaptation
+Speed (Wang et al., 2023a), which measures how quickly an agent reaches a certain performance threshold
+or converges to an optimal strategy within the short horizon.
+
+
+                                                             43
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Short-horizon adaptations are well-suited for evaluating the initial learning capabilities and immediate adapt-
+ability of self-evolving agents. They can effectively demonstrate whether an agent can learn from recent
+experiences and improve its performance on in-domain tasks. This category is widely used for current self-
+evolving agents. However, the limited temporal window makes it challenging to assess long-term knowledge
+retention (mitigating catastrophic forgetting) and true lifelong learning capabilities across vastly different or
+sequentially presented tasks.
+
+
+
+
+7.2.3   Long-Horizon Lifelong Learning Ability Assessment
+
+
+Long-horizon lifelong learning ability assessment is crucial for truly assessing self-evolving agents, as they
+focus on the agent’s ability to continuously acquire, retain, and reuse knowledge across diverse environments
+and over extended periods. As shown in Table 9, it mainly focuses on continuous learning, knowledge
+accumulation, and sustained performance across a diverse and potentially ever-changing stream of tasks or
+environments over an extended period. This is a nascent but critical area, where unique challenges include
+catastrophic forgetting, robust knowledge transfer across disparate tasks, efficient resource management over
+extended durations, and mitigating data leakage when continuously evaluating on evolving data distributions.
+Specialized benchmarks are emerging to tackle these complexities.
+Currently, there are few benchmarks of this type. LTMBenchmark (Castillo-Bolado et al., 2024) is a special-
+ized benchmark focusing on long-term memory (LTM) evaluation. It assesses LLM agents’ memory retention
+and continual learning through dynamic conversational tests, using interleaved dialogues with controlled dis-
+tractions to simulate real-world recall challenges. Key metrics include task accuracy, memory-span-weighted
+LTM Score, and efficiency measures (tests/hour, cost) for cross-architecture comparison. LifelongAgent-
+Bench (Zheng et al., 2025b) is another pioneering benchmark specifically designed to evaluate agent lifelong
+learning. It constructs sequences of interdependent tasks across domains like Database (DB), Operating
+System (OS), and Knowledge Graph (KG), requiring agents to progressively build upon previously acquired
+skills. This allows for systematic tracking of performance improvement and knowledge retention across a
+prolonged learning trajectory. To address the lack of diverse environments for testing generalization, Au-
+toEnv (Zhang et al., 2025i) introduces a framework for automatically generating heterogeneous worlds from
+factorizable rule distributions. This work also contributes the AUTOENV-36 dataset to systematically mea-
+sure an agent’s cross-environment learning and adaptation capabilities. In addition, there is a solution
+that constructs a dynamic benchmark through continuously updating benchmark datasets (White et al.,
+2024; Yang et al., 2025c) or evolving the benchmark itself by reconstructing original benchmarks to evalu-
+ate self-evolving agents, which can alleviate data leakage to some extent (Chen et al., 2025g). Benchmark
+Self-Evolving (Wang et al., 2024e), for example, proposes a solution to continuously update the existing
+benchmark through iteration. Similarly, the TRACE framework (Guo et al., 2025a) addresses benchmark
+saturation by enabling agents to evolve tasks to higher difficulty through test-time exploration. The validity
+of these new, more complex tasks is ensured by a "validate-by-reproducing" paradigm, which confirms the
+agent’s recorded trajectory is reproducible. Preliminary findings from such dynamic benchmark scenarios
+have shown that model performance can degrade as the benchmark evolves, highlighting the difficulty of
+continuous adaptation.
+Metrics for long-horizon lifelong learning go beyond simple success rates to quantify the agent’s evolving
+ability, such as Forgetting (FGT), Backward Transfer (BWT) (Zheng et al., 2025c), and Cost-per-Gain.
+Long-term Generalization metrics could involve assessing performance on a continuously evolving set of out-
+of-distribution tasks or measuring the breadth of tasks an agent can still perform effectively after prolonged
+learning across many domains.
+Long-horizon lifelong learning ability assessment is essential for comprehensively evaluating the core promise
+of self-evolving agents: their ability to learn continuously, retain knowledge, and generalize effectively over ex-
+tended periods. They are critical for assessing Retention, Generalization to truly novel scenarios, and the Effi-
+ciency of long-term operation. This area remains a key frontier for research in evaluating self-evolving agents.
+Beyond fixed long-horizon streams, an open-ended variant continuously evolves tasks/tools/environments.
+
+
+                                                        44
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                                        Table 10: Standardized evaluation protocols
+                                                                                                               Work Example for Long-horizon (EvoAgent
+ Aspect               Short-horizon                                Long-horizon
+                                                                                                               (Yuan et al., 2025a))
+                                                                                                               Optimizes long-horizon Success Rate (SR) and Ex-
+                                                                   Retention, generalization,    efficiency,   ploration Efficiency (EE) on 67 Minecraft tasks
+ Goal aligned         Adaptivity, efficiency
+                                                                   long-term safety                            (five tiers) plus Atari; e.g., Overall SR improves
+                                                                                                               from 21.80% to 30.29% (relative gain ≈ 105.9%).
+                                                                                                               Maintains a persistent Multimodal Experience Pool
+                      No persistence across tasks; all updates     Full persistence of model / prompt /        and continual World Model, updating parameters
+ State persistence
+                      reset after each episode                     memory / tools across tasks                 and experience after each subtask and reusing them
+                                                                                                               across subsequent tasks without reset.
+                                                                                                               Uses a fixed long-horizon Minecraft benchmark (67
+                                                                   Streamed      sequences   with     non-
+                                                                                                               tasks split into Wood/Stone/Iron/Gold/Diamond
+                      Fixed benchmark or episodic sampling;        stationary distributions;    versioned
+ Dataset structure                                                                                             tiers) plus Atari as a cross-environment test set;
+                      IID or near-IID task variants                tasks; explicit OOD clusters for trans-
+                                                                                                               tasks are pre-defined rather than streamed or ver-
+                                                                   fer
+                                                                                                               sioned.
+                                                                                                               Enforces a per-subtask step cap Lmax and matches
+                                                                   Stage cap Kstage + cumulative cap           DreamerV3’s environment-step budget, reporting
+                      Per-task cap Kshort (iterations, tool
+ Evolution budget                                                  Ktotal ; explicit memory/tool growth        wall-clock of ∼ 2.7 days vs. ∼ 7 days on one A100,
+                      calls, tokens, wall-clock)
+                                                                   policy                                      but without explicit formulas for Kstage /Ktotal or a
+                                                                                                               formal memory/tool growth policy.
+                                                                                                               Logs each terminated subtask as a trajectory
+                                                                                                               (states, rewards, completion ratios) into the experi-
+                      Per-iteration:       seeds,   prompts,       Above + persistent state checkpoints,
+                                                                                                               ence pool for CL-based sampling and world-model
+ Required logging     model/tool versions, full reason-            replayable trajectories, scheduled reten-
+                                                                                                               updates, but does not publish full replayable per-
+                      ing/action traces, cost breakdown            tion probes, evolution decision logs
+                                                                                                               iteration logs, checkpoints, or scheduled retention
+                                                                                                               probes.
+                                                                   Retention:   BWT/FGT, forgetting            Uses SR and EE per tier plus an Overall aggregate;
+                      Adaptivity: success-by-iteration curves,
+                                                                   curves; Generalization: temporal &          e.g., on Gold and Diamond tiers EvoAgent roughly
+ Primary metrics      AULC; Generalization:            within-
+                                                                   cluster-OOD; Efficiency:   Cost-per-        doubles SR over baselines, but no BWT/FGT or
+                      distribution transfer
+                                                                   Gain (CPG)                                  explicit forgetting curves are reported.
+                                                                                                               Efficiency is captured by EE and wall-clock (e.g.,
+                                                                   Cumulative CPG, stage-wise efficiency,      > 6× fewer ineffective steps on average and 2.7
+                      Cost-per-Gain (CPG), tokens-per-
+ Efficiency metrics                                                token-drift (tokens/task over time),        vs. 7 days training), while CPG, token-drift, and
+                      success, tool calls, latency per iteration
+                                                                   memory growth rate                          memory-growth statistics are not explicitly re-
+                                                                                                               ported.
+                                                                   Long-horizon safety drift tracking; pe-     Relies on an internal self-verification module with
+                      Per-episode: Safety Score, Harm Score,
+                                                                   riodic probes (Safety/Harm/CuP/Risk         goal-similarity and Lmax to terminate unproductive
+ Safety auditing      Refusal Rate; window-level Leakage
+                                                                   Ratio); persistent Leakage Rate across      subtasks, but does not run external safety bench-
+                      Rate
+                                                                   stages                                      marks or track long-horizon safety drift.
+                                                                                                               After initial task specification, training and evalua-
+                                                                   Cumulative human-time + guidance-
+                      Human-time + guidance-tokens per                                                         tion are fully autonomous with no human feedback
+ Human-in-loop                                                     tokens; stage-wise intervention fre-
+                      episode; intervention count                                                              or labeling, and human-time/guidance-tokens are
+                                                                   quency; intervention-to-success ratio
+                                                                                                               effectively 0 (not numerically reported).
+                                                                                                               Provides SR/EE tables over all tiers and ablations
+                                                                   Learning/forgetting matrix; stage ta-       over planner/control/reflection/world-model mod-
+                      Learning curve + AULC; per-task sum-
+ Required outputs                                                  bles + long-horizon curves; detailed        ules, but no learning/forgetting matrices or detailed
+                      mary table; cost breakdown
+                                                                   cost taxonomy breakdown                     cost-taxonomy (tokens/time/tool/memory) break-
+                                                                                                               downs.
+
+
+
+
+7.2.4     Standardized Evaluation Protocols
+
+To address the heterogeneity of existing setups and to make trajectory-centric evaluation reproducible, we
+further distill the above considerations into standardized protocols for short-horizon and long-horizon as-
+sessment, summarized in Table 10. For short-horizon settings, we assume no cross-task state persistence
+and impose a per-task evolution budget Kshort (in iterations, tool calls, tokens, or wall-clock time), require
+per-iteration logging of prompts, model/tool versions, full reasoning and action traces, and cost breakdowns,
+and report adaptivity via success-by-iteration curves and area-under-learning-curve together with basic effi-
+ciency metrics (e.g., tokens-per-success, latency). In contrast, long-horizon protocols assume full persistence
+of model parameters, prompts, memories, and toolsets across tasks, specify both stage-wise and cumulative
+evolution budgets (Kstage , Ktotal ) alongside explicit memory/tool growth policies, and mandate richer log-
+ging: replayable trajectories, persistent checkpoints, scheduled retention probes, evolution decision logs, and
+human-in-the-loop statistics to expose the degree of self-directedness. Primary long-horizon metrics then
+expand beyond instantaneous success to include retention (FGT/BWT and forgetting curves), temporal and
+cluster out-of-distribution generalization, cost-per-gain and efficiency drift over time, as well as long-run
+
+
+                                                                              45
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+safety indicators such as safety incident rates and policy-compliance under evolving behavior. Our worked
+example, EvoAgent (Yuan et al., 2025a), illustrates both the feasibility and current limitations of prac-
+tice: it already satisfies key elements of the long-horizon protocol—persistent world-model and experience
+updates, explicit per-subtask step caps, and reporting of SR/EE and wall-clock efficiency—but leaves many
+recommended axes (e.g., standardized retention metrics, explicit CPG/token-drift, and long-term safety drift
+tracking) unreported, highlighting concrete gaps for future self-evolving agent evaluations to close.
+

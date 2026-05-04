@@ -1,0 +1,187 @@
+4   When to Evolve
+
+The temporal dimension of self-evolution in LLM-based agents mainly concerns the relationship between
+learning processes and task execution. Therefore, the second key aspect of a self-evolving agent is identifying
+the evolving timing, i.e., at which stage the self-evolving strategy f is invoked and applied to the agent system.
+To this end, we propose a taxonomy that distinguishes between two temporal modes of self-evolution: Intra-
+test-time self-evolution and inter-test-time self-evolution.
+Intra-test-time self-evolution refers to adaptive processes that occur during task execution, where agents
+recognize their limitations on a specific problem and initiate targeted learning mechanisms to enhance their
+capabilities in real-time (Xi et al., 2024; Bi et al., 2024). This mode of evolution is characterized by its
+immediate coupling with the task at hand: the agent improves its problem-solving abilities for a specific
+problem encountered, creating a dynamic interplay between performance and adaptation.
+Inter-test-time self-evolution refers to learning processes that occur between task completions, leveraging
+accumulated experiences to improve future performance. This category encompasses diverse methodological
+approaches: offline learning paradigms that extract knowledge from pre-collected datasets through iterative
+refinement (Zelikman et al., 2022; 2024), and online learning paradigms that continuously adapt based on
+streaming interaction data (Qi et al., 2024; Qiu et al., 2025b; Qian et al., 2024b; Wang et al., 2025o).
+The implementation of self-evolution across these temporal phases leverages three fundamental learning
+paradigms in LLMs: in-context learning (ICL) (Dong et al., 2022; Min et al., 2021; Wies et al., 2023), which
+adapts behavior through contextual examples without modifying parameters; supervised fine-tuning (SFT),
+which updates model weights through gradient-based optimization on labeled data (Devlin et al., 2018; Shen,
+2024; Dong et al., 2023); and reinforcement learning (RL), which shapes behavior through reward-driven
+policy optimization (Kaelbling et al., 1996; Sun et al., 2024a; Zhang et al., 2025n). While these learning
+
+
+                                                       16
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                                 Variant Generation   Verification   Policy Update
+               Intra-test-time
+                Self-evolution
+
+
+
+              Agent                                                                            Task
+
+
+
+
+                                                                                     Inter-test-time
+                                 Policy Update        Trajectory        Rollout       Self-evolution
+
+
+
+Figure 5: An overview of when to evolve. The top pathway illustrates intra-test-time self-evolution, where
+adaptation (e.g., variant generation, verification, and policy update) occurs within task execution. The bot-
+tom pathway depicts inter-test-time self-evolution, where learning happens retrospectively through rollout,
+trajectory analysis, and policy updates.
+
+
+paradigms remain conceptually consistent across temporal contexts, their instantiation differs in terms of
+data availability and learning objectives:
+Intra-test-time is characterized by its online nature: learning data emerges dynamically during task execution,
+with optimization directly targeting performance enhancement on the immediate problem instance. This
+real-time coupling necessitates rapid adaptation mechanisms that can process learning data and feedback
+signals and modify behavior within the temporal constraints of active task-solving. On the other hand,
+inter-test-time is characterized by its retrospective nature: learning algorithms operate on historical data,
+whether from curated datasets or accumulated behavioral trajectories, with optimization objectives oriented
+toward improving expected performance across the task distribution rather than maximizing success on any
+specific problem instance. This temporal decoupling enables more sophisticated learning procedures that can
+identify cross-task patterns, consolidate diverse experiences, and develop generalizable capabilities without
+the immediacy constraints of active task execution.
+
+4.1   Intra-Test-Time Self-Evolution
+
+In intra-test-time self-evolution, agents engage in self-improvement processes that are intrinsically coupled
+with solving the immediate task at hand. The distinguishing characteristic of this temporal phase is its
+synchronous nature: feedback signals are generated and processed during task execution, with optimization
+objectives specifically targeted at improving performance on the current problem instance rather than gen-
+eralizing to future tasks. Here, we introduce how the three learning paradigms are realized in this temporal
+phase.
+
+In-Context Learning Intra-test-time ICL methods leverage the model’s context window as a dynamic
+memory system for immediate adaptation without parameter modification. These approaches typically em-
+ploy self-reflective mechanisms where agents analyze their own performance, generate verbal critiques or
+insights, and maintain these reflections in episodic memory buffers to guide subsequent decisions within the
+same task context (Shinn et al., 2023; Madaan et al., 2023a). Some methods extend beyond simple reflection
+to include dynamic planning revision, where agents can modify their entire approach based on environmental
+feedback, switching between action execution and plan modification as needed. For instance, AdaPlanner
+(Sun et al., 2023) decomposes tasks into manageable sub-goals and predicts environmental feedback for each.
+During execution, its refiner component distinguishes between in-plan feedback (observations aligning with
+predictions) and out-of-plan feedback (deviating observations). For in-plan feedback, the refiner dynamically
+queries the LLM through a specialized ask_LLM() action to parse observations and extract pertinent infor-
+mation. For out-of-plan feedback, the refiner proactively revises the entire plan and resumes solving from an
+intermediate point, rather than restarting from scratch. This adaptive closed-loop framework eliminates the
+need for prior knowledge about feedback structures and enables more efficient decision-making. Similarly,
+TrustAgent (Hua et al., 2024) employs rule-based plan revision during execution, modifying its approach
+
+
+                                                          17
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+based on language feedback to evolve toward safer planning strategies. These ICL methods demonstrate how
+test-time adaptation can achieve sophisticated behavioral modification without permanent model changes,
+maintaining flexibility while preserving the model’s general capabilities.
+
+Supervised Fine-Tuning. Intra-test-time SFT represents a paradigm shift where models perform imme-
+diate self-modification through learned meta-adaptation strategies. Self-adaptive language modeling (Zweiger
+et al., 2025) exemplifies this approach by generating “self-edits”, which are meta-level instructions that can
+restructure information representations, specify optimization hyperparameters, or invoke tools for data aug-
+mentation and gradient computation. These self-edits trigger immediate supervised fine-tuning, resulting
+in persistent weight updates that adapt the model to the current task. The key innovation lies in the
+meta-learning phase, where reinforcement learning trains models to produce effective self-edits by using
+the downstream performance of the updated model as the reward signal, essentially teaching models how to
+teach themselves. Acikgoz et al. (2025) introduce a Test-Time Self-Improvement (TT-SI) framework that en-
+ables agents to adapt on-the-fly by first identifying uncertain test samples through self-awareness. For these
+challenging inputs, the agent then generates a single synthetic training example and performs a temporary,
+lightweight parameter update to improve its immediate performance before resetting its weights.
+
+Reinforcement Learning. Intra-test-time RL enables models to develop new capabilities on-demand
+when encountering problems beyond their current competence. LADDER (Simonds & Yoshiyama, 2025)
+demonstrates this through its test-time reinforcement learning (TTRL) mechanism: upon identifying a
+particularly challenging problem, the system generates a focused set of related problem variants and conducts
+intensive, targeted reinforcement learning specifically for that problem class. This approach transforms
+insurmountable challenges into learning opportunities, allowing models to expand their problem-solving
+repertoire during deployment rather than failing or providing suboptimal solutions. The method represents
+a form of just-in-time skill acquisition, where computational resources are invested precisely when and where
+they are needed most.
+
+4.2   Inter-Test-Time Self-Evolution
+
+Inter-test-time self-evolution represents the predominant learning process in autonomous agents, wherein
+adaptation occurs following task execution rather than during it. In this temporal mode, agents complete a
+given task, extract feedback signals, including explicit rewards (Gao et al., 2024), gradients (Amari, 1993;
+Bottou, 2010), and performance metrics (Ge et al., 2023), and subsequently leverage this information to
+enhance their capabilities for future problem-solving. This retrospective learning process decouples task
+performance from capability improvement, allowing agents to consolidate experiences, identify patterns of
+success and failure, and systematically refine their behavioral policies without the computational constraints
+imposed by real-time task demands.
+
+In-Context Learning. Inter-test-time in-context learning has emerged as a widely adopted approach for
+agent self-improvement. This paradigm leverages execution results and feedback from previous tasks as con-
+textual information for future problem-solving. Wang et al. (Wang et al., 2024j) demonstrate this principle
+by inducing workflows from agent action histories and incorporating them into the context for subsequent
+tasks. The field of in-context reinforcement learning (ICRL) (Moeini et al., 2025; Laskin et al., 2022; Lee
+et al., 2023) extends this concept by maintaining histories of observations and actions within the agent’s
+context window. These methods exploit the hypothesis that pre-trained neural networks can implement
+implicit reinforcement learning algorithms within their forward pass, processing contextual information to
+adapt behavior without parameter updates (Kirsch et al., 2023). A defining characteristic of ICRL is in-
+context improvement: the phenomenon whereby agent performance progressively enhances as task-relevant
+information accumulates in the context, enabling sophisticated adaptation through attention mechanisms
+rather than gradient-based learning.
+
+Supervised Fine-Tuning. Inter-test-time SFT (Chen et al., 2025b) methods establish a paradigm of
+iterative self-improvement through synthetic data generation and self-evaluation. SELF (Lu et al., 2023)
+pioneered meta-cognitive training, where models first acquire self-feedback and self-refinement capabilities,
+
+
+                                                     18
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+then iteratively generate responses to unlabeled instructions and enhance them through self-critique. STaR
+(Zelikman et al., 2022) and Quiet-STaR (Zelikman et al., 2024) focus on reasoning improvement through
+rationalization—models attempt problems, then generate explanations for correct answers they initially failed
+to solve, creating augmented training data that combines successful attempts with post-hoc reasoning. SiriuS
+(Zhao et al., 2025b) extends this to sequential problem-solving, maintaining repositories of correct solutions
+while augmenting failures through multi-stage refinement involving feedback incorporation, regeneration, and
+rephrasing. These methods share a core insight: models can bootstrap their own improvement by learning to
+evaluate and enhance their outputs, creating high-quality training signals from initially imperfect attempts
+without extensive human supervision. Recent frameworks such as ARIA (He et al., 2025a) further extend
+this paradigm by incorporating human-in-the-loop guidance into test-time adaptation, allowing agents to
+proactively identify knowledge gaps and request expert feedback.
+
+
+Reinforcement Learning. Inter-test-time RL leverages unconstrained computational resources to op-
+timize agents through extensive environmental interaction and sophisticated curriculum design. RAGEN
+(Wang et al., 2025q) and DYSTIL (Wang et al., 2025c) employ online reinforcement learning for multi-turn
+interactive tasks, continuously refining policies through on-policy learning in simulated dialogues. Learning
+Like Humans (Zhang et al., 2025a) introduces cognitive-inspired training with adaptive difficulty progression,
+combining on-policy exploration with off-policy efficiency and expert demonstrations to accelerate learning.
+Domain-specific applications demonstrate the versatility of inter-test-time RL: WebRL (Qi et al., 2024) de-
+velops web navigation agents through self-evolving curricula that automatically adjust task complexity based
+on performance, while DigiRL (Bai et al., 2024) enables device-control agents to master in-the-wild inter-
+actions through autonomous reinforcement learning. These approaches exploit the pre-deployment phase
+to engage in extensive trial-and-error learning, developing robust policies through thousands of interactions
+that would be impractical during real-time deployment.
+
+

@@ -1,0 +1,272 @@
+5.4     Cross-cutting Evolutionary Dimensions
+
+After outlining the three core evolutionary paradigms, we now analyze their cross-cutting dimen-
+sions—revealing how different design choices balance feedback type, data source, and learning stability.
+Agent self-evolution is a multifaceted process characterized by a number of cross-cutting dimensions that
+shape how agents learn, adapt, and improve over time. Beyond any single learning algorithm or supervision
+signal, these dimensions define the core principles underlying the design and analysis of autonomous agents.
+In this section, we systematically compare the major families of self-evolution methods—reward-based,
+imitation/demonstration-based, and population-based—along several key axes, such as learning paradigm
+(online vs. offline), policy consistency (on-policy vs. off-policy), and reward granularity (process-based,
+outcome-based, or hybrid). We further highlight additional dimensions, including feedback types, data
+sources, sample efficiency, stability, and scalability, as summarized in Table 4. This comprehensive compari-
+son provides a unified perspective for understanding the strengths, limitations, and design trade-offs inherent
+in different approaches to agent evolution.
+
+5.4.1    Online and Offline Learning
+
+Another fundamental dimension in the design of self-evolving agents is the learning paradigm, which can be
+broadly categorized as either offline or online. This distinction depends on whether the agent’s evolutionary
+updates are performed on a static, pre-collected dataset of experiences (offline) or through continuous, direct
+interaction with a live environment (online).
+Offline Learning In the offline learning paradigm, the learning phase is decoupled from live task execution.
+The offline process typically involves cycles of offline data generation, filtering, and model fine-tuning, focus-
+ing on building a powerful and generalist foundational model before deployment. A primary strategy in this
+
+
+                                                       27
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                     Agent Evolution
+                                                  Offline Learning                                     Online Learning
+         Learning Paradigm
+                                       Data                                   Model            Agent                     Environment
+                                                       Filtering
+                                     Generation                            Fine-tuning
+
+
+
+                                                On-policy Evolution                                    Off-policy Evolution
+         Policy Consistency
+                                                                                                     πθ
+                                                                                                                      Replay
+                                          πθ         Env           Traj                         Human Demos
+                                                                                                                      Buffer
+                                                                                                 Other agents
+
+                                        Process-based Reward                   Hybrid Reward      Outcome-based Reward
+         Reward Granularity
+
+                                       Step 1        Step 2          Step 3              …                Outcome
+
+
+
+
+Figure 7: Illustration of the cross-cutting evolutionary dimensions underlying agent self-evolution. Learn-
+ing Paradigm: in offline learning, data are pre-collected and used for filtering and fine-tuning, while
+in online learning, agents continuously interact with their environments for real-time adaptation. Policy
+Consistency: on-policy evolution updates policies based on the agent’s own trajectories, whereas off-policy
+evolution relies on replay buffers, human demonstrations, or experiences from other agents. Reward Gran-
+ularity: feedback can be process-based (step-level rewards), outcome-based (final-result rewards), or a hybrid
+of both. Together, these three orthogonal axes define how agents generate data, adapt their policies, and
+receive feedback across reward-based, imitation-based, and population-based evolution paradigms.
+
+
+           Table 4: Comparison of self-evolution method families along key dimensions.
+ Dimension            Reward-based               Imitation/Demonstration    Population-based
+ Feedback Type                Scalar reward, natural                      Demonstration trajecto-               Fitness scores, task suc-
+                              language, confidence, ex-                   ries, exemplars, ratio-               cess, competitive signals
+                              ternal signals                              nales
+ Data Source                  Self-generated, environ-                    Self-generated or other               Population generations,
+                              ment, external rules                        agents, humans                        multi-agent systems
+ Reward Granularity           Outcome/process/hybrid                      Usually              out-             Often       outcome-level,
+                              (flexible)                                  come/process          (via            sometimes process via
+                                                                          demo steps)                           competition
+ Online/Offline               Both (reward learning,                      Typically offline, some-              Online evolution or
+                              RL, DPO, SFT)                               times online demo min-                batch population up-
+                                                                          ing                                   dates
+ On/Off-policy                Both (DPO, Reflexion,                       Primarily off-policy, but             Off-policy (population);
+                              GRPO)                                       online variants can be                self-play is on-policy
+                                                                          on-policy
+ Sample Efficiency            Moderate (depends on                        High (if demo quality is              Usually low (needs many
+                              reward sparsity)                            high)                                 trials)
+ Stability                    Sensitive to reward de-                     Sensitive to demo qual-               Sensitive to population
+                              sign                                        ity/diversity                         size/diversity
+ Scalability                  Good with automation                        Limited by demo collec-               High     but   resource-
+                                                                          tion                                  intensive
+
+
+
+domain is LLM bootstrapping, where a model enhances its own capabilities using its self-generated content.
+For example, Self-Instruct(Wang et al., 2022) shows how a language model can bootstrap its own instruction-
+following ability by generating new instructions, paired with its own responses, creating a synthetic dataset
+
+
+                                                                    28
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+for fine-tuning. Building on this, WizardLM(Xu et al., 2024a) demonstrates how to progressively evolve the
+complexity of these self-generated instructions, pushing the model’s capabilities on more challenging tasks.
+Although these methods primarily focus on broad capability expansion via synthetic heuristics, acting as
+a bootstrapping phase, they lay the necessary groundwork for closed-loop, experience-driven evolution de-
+fined in our framework. In the context of GUI and Web agents, offline learning often involves leveraging
+pre-collected high-quality trajectories for supervised fine-tuning (SFT). OS-Genesis(Sun et al., 2024b) intro-
+duced a reverse task synthesis method for automatic trajectory creation. Similarly, UI-Genie(Xiao et al.,
+2025a) employs a unified reward model for trajectory evaluation and a self-improving loop to generate high-
+quality trajectories iteratively. Both approaches focus on curating a rich SFT dataset to enhance the agent’s
+capabilities to solve complex tasks. Beyond SFT, offline methods also incorporate reinforcement learning
+performed on a static dataset of agent-environment interactions. For example, GUI-R1(Luo et al., 2025b)
+and InfiGUI-R1(Liu et al., 2025e) utilize rule-based rewards and apply R1-style(Guo et al., 2025b) training
+on offline GUI datasets.
+Online Learning In contrast, online learning enables an agent to learn and adapt continuously while it
+interacts with a live or simulated environment. Feedback from each action is used to update the agent’s policy,
+plan, or knowledge base in real-time. This allows for greater adaptability to dynamic or unseen situations.
+Some agents evolve online not by updating their model weights, but by refining their plans and skill libraries
+on the fly. For example, Voyager(Wang et al., 2023a) presents an LLM-powered agent that learns to play
+Minecraft by continuously exploring, generating its own curriculum of tasks, and building a persistent skill
+library from direct experience. AdaPlanner(Sun et al., 2023) focuses on adapting its plan within a task;
+it generates an initial plan, receives feedback from the environment, and refines the plan online. Similarly,
+SwiftSage(Lin et al., 2023) operates with a fast-and-slow thinking process, where it can reflect on failures of
+its fast, intuitive mode and switch to a more deliberate, tool-using slow mode, adapting its strategy online
+based on task difficulty. Reinforcement Learning serves as a fundamental mechanism for online learning,
+enabling agents to learn from environmental reward signals. DigiRL(Bai et al., 2024) demonstrates how to
+train device-control agents in the wild using autonomous RL, while DistRL(Wang et al., 2024g) proposes
+an asynchronous distributed framework to make such on-device training feasible. MobileGUI-RL(Shi et al.,
+2025b) addresses the specific challenges of training GUI agents in online mobile environments by introducing
+a synthetic task generation pipeline combined with group relative policy optimization (GRPO) through
+trajectory-aware rewards.
+
+5.4.2   On-policy and Off-policy Learning
+
+While the previous section examined the timing of data collection and learning (online vs offline), this section
+focuses on the policy consistency aspect of agent evolution - specifically, whether agents learn from experi-
+ences generated by the same policy they are trying to improve (on-policy) or from experiences generated by
+different policies (off-policy). This distinction is crucial for understanding how agents utilize their experien-
+tial data and manage the trade-offs between learning stability and sample efficiency during the evolutionary
+process.
+On-policy Learning. On-policy approaches require agents to learn exclusively from experiences generated
+by their current policy, ensuring policy consistency but often at the cost of sample efficiency. Reflexion
+(Shinn et al., 2023) exemplifies this approach through its iterative self-reflection mechanism. The agent
+generates responses using its current policy, receives feedback on failures, and immediately incorporates this
+feedback to update its reasoning process for the next iteration. GRPO (Shao et al., 2024b) and DAPO
+(Yu et al., 2025a) continue this path and show the effectiveness of multiple rollouts. The agent always
+learns from its current behavior, maintaining strict policy consistency. In agent settings, on-policy methods
+provide excellent learning stability and avoid distribution mismatch issues that plague off-policy methods.
+However, they suffer from low sample efficiency, as each policy update requires fresh data collection, making
+them computationally expensive for complex multi-step reasoning or tool use scenarios where generating
+high-quality trajectories is costly.
+Off-policy Learning. Off-policy approaches allow agents to learn from experiences generated by different
+policies, including previous versions, other agents, or human demonstrations, significantly improving sample
+efficiency at the cost of potential distribution mismatch. Yuan et al. (2024c) demonstrates a sophisticated
+
+
+                                                       29
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+off-policy approach where model Mt+1 learns from preference data generated by the previous version Mt .
+The system handles distribution shift through DPO’s built-in KL divergence constraint with the reference
+policy, preventing the new policy from deviating too far from the data-generating policy. Yuan et al.
+(2023) showcases another powerful off-policy paradigm by learning from diverse response sources—including
+other models, humans, and different sampling strategies—through ranking-based supervision. The method
+elegantly sidesteps distribution shift by treating alignment as a ranking problem rather than requiring policy
+consistency. Zhao et al. (2025b) illustrates off-policy learning in multi-agent settings, where agents learn from
+an "experience library" containing successful interaction trajectories generated by previous policy versions,
+enabling efficient reuse of expensive multi-agent coordination data. In agent settings, off-policy methods
+excel in sample efficiency, allowing agents to leverage historical data, expert demonstrations, and cross-agent
+learning. They are particularly valuable for multi-step reasoning where successful trajectories are rare and
+expensive to generate, and for tool use scenarios where agents can learn from diverse execution examples
+without repeated environmental interaction. However, they face challenges with distribution shift, reward
+hacking (where agents exploit inconsistencies between training and deployment policies), and the need for
+careful regularization to maintain training stability.
+
+
+5.4.3   Reward Granularity
+
+Another critical choice in the reward design is its granularity, which determines at what level of detail the
+agent receives its learning signal. Reward granularity ranges from coarse-grained outcome-based rewards,
+which evaluate the overall task completion, to fine-grained process-based rewards that assess each step of
+the agent’s trajectory. Current self-evolution frameworks adopt these varying levels of granularity to tailor
+feedback mechanisms according to task complexity and the desired learning outcomes.
+Outcome-based Reward Outcome-based Reward is a feedback mechanism that evaluates an agent based
+on the successful completion of predefined tasks. This reward is determined solely by the final state of
+the agent’s trajectory, regardless of the intermediate steps. A central challenge, particularly in dynamic
+environments like web or GUI navigation, is to effectively learn from both successful trajectories and the
+much more frequent failure trajectories. To address this, Direct Preference Optimization (DPO)(Rafailov
+et al., 2023) is designed to directly maximize the likelihood of preferred responses while minimizing the KL-
+divergence with the reference policy. Similarly, RRHF(Yuan et al., 2023) employs a ranking loss approach
+that aligns model probabilities of multiple responses with human preferences by ranking response probabilities
+without requiring auxiliary value models. Moreover, several works have developed specialized frameworks
+for agent self-evolution that are built upon outcome-based rewards. A straightforward approach is rejection
+sampling finetuning, as used in AutoWebGLM(Lai et al., 2024). This method employs a pre-designed reward
+model to evaluate trajectory outcomes, identify the successful trajectories, and update the model with this
+high-quality data. DigiRL(Bai et al., 2024) models the GUI navigation task as a Markov Decision Process
+(MDP) and obtains a final, sparse reward at the end of an episode using a VLM-based evaluator. WebRL(Qi
+et al., 2024) develops a robust outcome-supervised reward model (ORM) to address the feedback sparsity
+inherent in dynamic web environments. The ORM evaluates task success within a self-evolving curriculum
+framework, enabling agents to learn from unsuccessful attempts and progressively improve.
+Process-based Reward In contrast to outcome-based rewards, which provide a single, delayed signal, the
+process-based reward paradigm offers more precise and granular feedback by evaluating each step in an
+agent’s trajectory. Process-supervised reward models (PRMs) have been demonstrated to be significantly
+more reliable than outcome-supervised reward models (ORMs), particularly in domains requiring complex
+reasoning like solving math problems(Lightman et al., 2023). However, obtaining such fine-grained step-level
+feedback traditionally requires extensive human annotations, which are both time-consuming and expensive
+to scale. To address this annotation bottleneck, Math-Shepherd(Wang et al., 2023b) proposes an automatic
+process annotation framework that utilizes Monte Carlo Tree Search (MCTS) to gather step-wise supervision
+by assessing each step’s potential to derive the correct final answer. Similarly, AlphaMath(Chen et al.,
+2024a) trains a value model to evaluate the step correctness in solution paths and updates both the policy
+and value model through exploration and exploitation within an MCTS framework. By leveraging process-
+based rewards, agents can improve their capabilities in a progressive, step-by-step manner. rStar-Math(Guan
+et al., 2025) and AgentPRM(Choudhury, 2025) both propose methods to iteratively evolve the policy and
+
+
+                                                       30
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+the process reward model, generating progressively higher-quality reasoning paths without manual labels.
+Agent Q(Putta et al., 2024) integrates a step-wise verification mechanism into its MCTS process to collect
+high-quality trajectories, which are then used to iteratively refine the policy via DPO training.
+Hybrid Reward The hybrid methods aim to provide more comprehensive learning signals by incorporat-
+ing both the clarity of final task success (outcome-based) and the granular guidance of intermediate steps
+(process-based). These methods overcome the sparsity of outcome-only signals while grounding the agent’s
+step-by-step reasoning in the ultimate task goal. For example, GiGPO(Feng et al., 2025a) addresses the
+instability of training long-horizon agents by introducing a dual-level reward mechanism. It provides an
+episode-level reward based on the final success of entire trajectories, while simultaneously assigning a local-
+ized, step-level reward for intermediate actions. This dual signal provides both a high-level directional goal
+and low-level corrective guidance. Similarly, SPA-RL(Wang et al., 2025d) proposes a reward decomposition
+method that bridges the gap between sparse outcome signals and dense process feedback. It attributes in-
+cremental progress to each step within multi-step trajectories based on the final task completion, effectively
+distributing the outcome-based reward across the process steps. This approach creates dense intermediate
+progress rewards that enhance reinforcement learning effectiveness while maintaining alignment with the
+ultimate task objectives.
+
+5.5   Other Dimensions of Self-Evolution Methods
+
+In addition to the core axes of learning paradigm, policy consistency, and reward granularity, Table 4
+highlights several other important dimensions that differentiate self-evolution methods:
+Feedback Type. The nature of feedback varies widely: reward-based methods leverage scalar rewards,
+natural language signals, or model confidence; imitation methods focus on demonstration trajectories and
+rationales; population-based methods use fitness scores or competitive signals. The feedback type funda-
+mentally determines what information the agent uses to improve.
+Data Source. Reward-based methods typically generate data through agent-environment interaction
+or engineered rules, while imitation learning often relies on human or expert-generated demonstrations.
+Population-based approaches draw from the collective experience of multiple agents or generations, enabling
+diverse exploration but requiring significant coordination.
+Sample Efficiency. Imitation learning is generally the most sample-efficient, provided high-quality demon-
+strations are available, as agents can directly mimic expert behavior. Reward-based methods are moderately
+efficient, with efficiency highly sensitive to reward sparsity. Population-based evolution tends to be sample-
+inefficient, as it often requires evaluating a large number of agent variants through many trials.
+Stability. Reward-based learning is sensitive to the quality and design of reward functions, risking re-
+ward hacking or unintended behaviors. Imitation learning depends heavily on the quality and diversity
+of demonstrations. Population-based methods are sensitive to population size and diversity, with small or
+homogeneous populations at risk of premature convergence.
+Scalability. Scalability is determined by the feasibility of data or feedback collection and the ability to
+parallelize learning. Reward-based methods scale well when feedback is automated (e.g., via simulators).
+Imitation learning is often bottlenecked by the cost of collecting demonstrations. Population-based ap-
+proaches can scale to large compute but are highly resource-intensive.
+Together, these dimensions offer a more nuanced, multidimensional view of self-evolution strategies, guiding
+practitioners in selecting and designing agent learning pipelines that are best matched to the challenges of
+their specific domains.
+
+

@@ -1,0 +1,119 @@
+7.3     Limitations of Current Evaluation Practices
+
+While previous sections outlines the core evaluation dimensions and their coverage, a broader view reveals
+that current practices still leave substantial blind spots and hinder fair comparisons across methods. To
+contextualize these limitations, we examine both the capability dimensions that remain under-evaluated and
+the factors that complicate apples-to-apples comparison under shared settings.
+
+7.3.1    Underserved Capability Intersections
+
+Long-horizon retention with privacy constraints: No benchmark combines extended memory assess-
+ment (as in LTMBenchmark (Castillo-Bolado et al., 2024)) with rigorous safety auditing (as in Agent-
+SafetyBench (Zhang et al., 2024i)), leaving open whether agents can maintain personalization across thou-
+sands of interactions while guaranteeing zero sensitive information leakage.
+Architecture adaptation under operational constraints: Current architecture search methods (e.g.,
+AFlow (Zhang et al., 2024c), ADAS (Hu et al., 2024c)) operate offline over extended periods to discover
+optimal workflows. No evaluation examines whether agents can autonomously evolve their architecture
+selection strategies, learning which topologies work best for different query types, while respecting real-time
+operational constraints (millisecond response latencies, per-query token budgets). This requires assessing
+not just final architecture quality, but whether the agent’s strategy for choosing or generating architectures
+improves persistently through experience under hard resource limits.
+Tool ecosystem evolution: Existing tool benchmarks provide fixed APIs; no evaluation captures the self-
+directed lifecycle of tool discovery, integration testing, and productivity measurement—capabilities demon-
+strated by systems like Alita but absent from standard assessment.
+Multi-agent safety under collaborative evolution: SwarmBench (Ruan et al., 2025) identifies coordi-
+nation failures at isolated time points; whether these failures amplify or attenuate over extended multi-agent
+co-evolution, and whether unsafe behaviors exhibit social contagion when agents learn from each other,
+remains unexplored.
+
+7.3.2    Challenges for Fair Comparison
+
+To supplement our discussion of evaluation benchmarks, we provide Table 11, which aligns a represen-
+tative subset of self-evolving agents evaluated under partially matched conditions, i.e., similar domains,
+benchmarks, and backbone models. This table aims to make explicit how different methods instantiate the
+what/when/how dimensions when the surrounding experimental context is held as constant as the litera-
+ture allows. However, as the table also makes clear, true apples-to-apples comparison remains infeasible at
+present. Existing works differ substantially in (1) reporting practices: key metrics such as latency, cost,
+and safety are often omitted or defined inconsistently; (2) evaluation pipelines: prompt formats, rollout
+budgets, tool access, and environment configurations vary widely; (3) backbone model choices: even nomi-
+nally similar models differ in size, training data, or inference settings; and (4) architectural design: agents
+implement distinct control loops, credit-assignment mechanisms, and memory systems that are not directly
+comparable. Because these factors interact with one another, normalizing results across methods would
+risk over-interpreting uncontrolled differences. As a result, Table 11 is presented as an illustrative snapshot
+rather than a definitive comparison.
+Despite these limitations, the table highlights several qualitative trends: methods using richer what struc-
+tures (e.g., architecture-level search) and inter-test when mechanisms often achieve stronger performance
+in domains where multi-step optimization is feasible, while lightweight intra-test reflection methods tend
+
+
+                                                      46
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Table 11: Comparative synthesis of some representative self-evolving agents under shared set-
+tings. Methods are grouped by domain; repeated entries use “–”. We summarize each method using the
+what/when/how taxonomy and report performance. Latency, cost, and safety metrics are not consistently
+reported, limiting full apples-to-apples comparisons.
+Area Benchmark     Base model     Method            What               When               How                  Perf. (%)
+code SWE           Gemini-1.5-pro Reflexion (Shinn Context / lesson / Intra-test (ICL)    Reward-based           14.3
+                                  et al., 2023)     reflection                            (textual)
+–     –            –              Learn-by-Interact Context / experi- Intra-test (ICL)    Reward-based           18.7
+                                  (Su et al., 2025) ence / reflection                     (textual)
+–     –            Claude-3.5-    Reflexion (Shinn Context / lesson / Intra-test (ICL)    Reward-based           54.4
+                   sonnet         et al., 2023)     reflection
+–     –            –              Learn-by-Interact Context / experi- Intra-test (ICL)    Reward-based           60.0
+                                  (Su et al., 2025) ence
+–     WebArena     Gemini-1.5-pro Reflexion (Shinn Context / lesson / Intra-test (ICL)    Reward-based           20.2
+                                  et al., 2023)     reflection                            (textual)
+–     –            –              Learn-by-Interact Context / experi- Intra-test (ICL)    Reward-based           25.6
+                                  (Su et al., 2025) ence
+web   WebArena     Claude-3.5-    Reflexion (Shinn Context / lesson / Intra-test (ICL)    Reward-based           40.4
+                   sonnet         et al., 2023)       reflection
+–     –            –              Learn-by-Interact Context / experi- Intra-test (ICL)    Reward-based           48.0
+                                  (Su et al., 2025) ence
+–     WebArena-Lite GLM-4-9B      DigiRL (Bai et al., Model policy    Inter-test (RL)     Reward-based           31.5
+                                  2024)                                                   (external env.)
+–     –            –              WebRL (Qi et al., Model policy      Inter-test (RL)     Reward-based           43.0
+                                  2024)                                                   (external env.)
+–     –            Llama3.1-8B    DigiRL (Bai et al., Model policy    Inter-test (RL)     Reward-based           30.3
+                                  2024)
+–     –            –              WebRL (Qi et al., Model policy      Inter-test (RL)     Reward-based           42.4
+                                  2024)
+math GSM8K         GPT-4o-mini    ADAS (Hu et al., Architecture        / Inter-test (RL / Population-based       90.5
+                                  2024c)             multi-agent sys- SFT hybrid)         workflow search
+                                                     tem
+–     –            –              AFlow       (Zhang Architecture      / Inter-test       Population-based       90.8
+                                  et al., 2024c)     multi-agent topol-                   (MCTS)
+                                                     ogy
+–     –            –              ScoreFlow (Wang Architecture           Inter-test       Imitation       +      94.6
+                                  et al., 2025n)     /      multi-agent                   preference   opti-
+                                                     (query-specific                      mization
+                                                     workflow)
+–     MATH         Gemini-1.5-    ADAS (Hu et al., Architecture        / Inter-test       Population-based       80.0
+                   pro-002        2024c)             multi-agent sys-
+                                                     tem
+–     –            –              AFlow       (Zhang Architecture      / Inter-test       Population-based       76.0
+                                  et al., 2024c)     multi-agent topol-
+                                                     ogy
+–     –            –              Mass        (Zhang Architecture / sin- Inter-test       Population-based       84.7
+                                  et al., 2025d)     gle / multi-agent                    evolutionary
+                                                     design search
+
+
+
+
+to be more cost-efficient but yield smaller gains. The absence of consistent latency/cost/safety reporting
+across nearly all methods underscores a key gap that limits broader synthesis. We hope this table serves
+as a concrete reference for how current approaches operationalize the what/when/how dimensions under
+comparable settings, while simultaneously motivating the need for standardized reporting to support future
+apples-to-apples evaluations.
+
+
+                                                        47
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+

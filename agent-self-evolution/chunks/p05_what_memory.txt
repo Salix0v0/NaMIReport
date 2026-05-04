@@ -1,0 +1,187 @@
+3.2     Context
+
+An essential component of an LLM agent to be evolved is the context, which shapes how an agent behaves.
+To start with, we want to interpret two terms, "prompt optimization" and "memory evolution", which have
+been used in different literature. In most cases, these two terms can be used interchangeably because they
+both refer to what is included in the context window. Prompt optimization asks "how can we phrase or
+structure the instructions so the LLM behaves better?", and attends to details such as the wording, ordering.
+On the other hand, memory evolution asks "how should we store, forget, and retrieve context so that the
+agent can stay informed and perform better?", which focuses on what past information to surface or archive.
+
+3.2.1    Memory Evolution
+
+LLM-based agents are increasingly designed with long-term memory mechanisms that grow and adapt as the
+agent continues to solve tasks and interacts with its environment(Shan et al., 2025; Qian et al., 2023a). An
+evolving memory enables the agent to accumulate knowledge, recall past events, and adjust its behavior based
+on experience. Many works stress that effective memory management is crucial for agent performance(Zhong
+et al., 2024; Zhang et al., 2025e; Yan et al., 2024). SAGE(Liang et al., 2024) uses the Ebbinghaus forgetting
+curve to decide what to remember or forget. A-mem(Xu et al., 2025a) updates the agent memory struc-
+ture to create interconnected knowledge networks through dynamic indexing and linking, following the basic
+
+
+                                                      11
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+principles of the Zettelkasten method. Mem0(Chhikara et al., 2025) introduces a two-phase pipeline where
+the agent first extracts salient facts from recent dialogue and then decides how to update the long-term
+memory: the agent can ADD new facts, MERGE/UPDATE redundant ones, or DELETE contradictions.
+Furthermore, Memory-R1 (Yan et al., 2025) presents a reinforcement learning framework to train a dedicated
+Memory Manager agent that learns to select structured operations like ADD, UPDATE, and DELETE. Such
+a mechanism ensures the agent’s long-term memory is coherent and up-to-date. MemInsight(Salama et al.,
+2025) augments raw memories with semantic structure, which summarizes and tags past interactions for
+retrieval later. REMEMBER(Zhang et al., 2024a) combines an LLM with a memory of experiences and uses
+reinforcement learning signals to decide how to update that memory after each episode. Memento (Zhou
+et al., 2025b) enables continual adaptation without fine-tuning the LLM’s parameters by employing online
+reinforcement learning to optimize a case-retrieval policy, which allows the agent to learn from past experi-
+ences stored in an evolving memory bank. MemGen (Zhang et al., 2025f) introduces a dynamic generative
+memory that operates in a latent space. It uses a learned memory trigger to decide when to invoke memory
+and a weaver to construct latent token sequences, enabling a fluid interweaving of reasoning and memory.
+A critical aspect of memory evolution is enabling agents to learn heuristics or skills from past experiences.
+Rather than only retrieving exact past instances, advanced agents distill experiences into more general
+guidance(Zhao et al., 2024a; Fu et al., 2024). Expel(Zhao et al., 2024a) processes past trajectories to
+generate insights and rules to guide further interactions. This experiential knowledge accumulation leads
+to measurable gains, as the agent steadily performs better with more experience. ReasoningBank (Ouyang
+et al., 2025) further develops this idea by distilling generalizable reasoning strategies from both successful and
+failed experiences into a structured memory. It also introduces memory-aware test-time scaling to generate
+diverse experiences on each task. Other systems focus on storing higher-level building blocks of problem-
+solving. For instance, Agent Workflow Memory(Wang et al., 2024j) records common sub-task sequences
+(workflows) so that an agent solving a complex task can retrieve and reuse a proven sequence of actions
+rather than plan from scratch. Similarly, MUSE (Yang et al., 2025a) introduces an experience-driven agent
+for long-horizon tasks, centered on a hierarchical memory module that organizes experience into strategic,
+procedural, and tool-use memories. The agent populates this memory through a Plan-Execute-Reflect-
+Memorize loop, enabling it to learn on the job. In the Richelieu diplomacy agent, the system improves its
+negotiation strategies by augmenting its memory through self-play games, storing the insights from simulated
+interactions to refine future decisions(Guan et al., 2024). By generalizing from specific episodes to reusable
+knowledge, these approaches illustrate how memory evolution turns an agent’s one-time experiences into
+long-term competencies, which leads to agents evolving.
+
+3.2.2   Prompt Optimization
+
+While memory evolution focused on what knowledge an agent retains, Prompt Optimization (PO) enables
+LLM agents to self-evolve by refining the instructions it feeds to the backbone model, which directly alters the
+model’s behavior without modifying model weights(Ramnath et al., 2025). Early research treats instruction
+design as a search problem. APE(Zhou et al., 2022) generates candidate prompts, scores them on validation
+examples, and selects the best. ORPO(Yang et al., 2023) extends this idea by letting the model iteratively
+rewrite its own prompt, guided by feedback on prior outputs. ADO(Lin et al., 2025a) introduces DSP that
+imposes semantic constraints on iteratively proposed prompts to facilitate finding the optimal prompt. Pro-
+TeGi(Pryzant et al., 2023) generates natural language "corrections" that are applied as edits to the prompt,
+forming a textual analogue of gradient descent. PromptAgent(Wang et al., 2023d) casts prompt discovery
+as Monte-Carlo Tree Search, exploring instruction space strategically, while evolutionary approaches like
+PromptBreeder(Fernando et al., 2023) maintain a population to discover increasingly effective instructions.
+REVOLVE(Zhang et al., 2024e) further stabilizes long optimization runs by tracking the trajectory of model
+responses and applying smoothed updates. Pushing this autonomy to its limit, SPO(Xiang et al., 2025)
+creates a fully self-contained loop where the model generates its training data and uses pairwise preference
+comparison on its outputs to refine the prompt, eliminating the need for any external labeled data or human
+feedback. Collectively, these techniques demonstrate that an agent can autonomously improve its prompting
+policy, turning prompt text into a learnable component that co-evolves with the agent’s experience. To ad-
+dress the brevity bias and context collapse of some optimizers, Agentic Context Engineering (ACE) (Zhang
+et al., 2025m) treats contexts as comprehensive playbooks that accumulate strategies over time. It uses a
+
+
+                                                       12
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+modular agentic process with incremental updates to evolve contexts for both offline prompt optimization
+and online memory adaptation.
+In complex systems, an agent often orchestrates a sequence of LLM calls or collaborates with other agents,
+making prompt design a multi-node problem. Frameworks such as DSPy represent an entire workflow as a
+graph whose sub-prompts are jointly tuned for a global objective(Khattab et al., 2023). Trace(Wang et al.,
+2023c), TextGrad(Yellamraju et al., 2024), and LLM-AutoDiff(Yin & Wang, 2025) generalize this idea by
+treating each prompt as a parameter in a differentiable program and propagating natural-language “gra-
+dients” to refine every step. In collaborative scenarios, Multi-Agent System Search (MASS)(Zhou et al.,
+2025a) first optimizes individual role prompts and then refines inter-agent communication patterns, while
+MAS-ZERO(Ke et al., 2025) dynamically proposes and revises role prompts to assemble an effective team
+for each new problem. Evolutionary systems such as EvoAgent(Yuan et al., 2024b) and AgentSquare(Shang
+et al., 2025) treat each agent along with prompts as the modules and use mutation and selection to dis-
+cover specialized teams that outperform hand-crafted designs. These approaches extend PO from a single
+instruction to the language that defines whole workflows or societies of agents.
+
+3.3   Tools
+
+An agent’s capabilities are fundamentally defined by the tools it can wield. The trajectory of agent devel-
+opment is marked by a crucial evolution: from being mere tool users to becoming autonomous tool makers.
+This transition from relying on predefined, static toolsets to enabling agents to autonomously expand and
+refine their own skills is a critical leap towards cognitive self-sufficiency. This paradigm, where agents dy-
+namically adapt their capabilities, allows them to solve a long tail of complex problems not envisioned by
+their initial designers. This evolution unfolds across three interconnected fronts: tool discovery, mastery,
+and management, as detailed in the subsections below.
+
+Autonomous Discovery and Creation The primary impetus for autonomous tool creation is to over-
+come the inherent limitations of a fixed toolset, granting agents the flexibility to innovate on demand.
+Methodologies for this now span a spectrum from opportunistic discovery to formalized synthesis. At one
+end, agents like Voyager build an ever-expanding library of skills through emergent trial-and-error, driven
+by an intrinsic motivation to explore complex, open-ended environments like Minecraft(Wang et al., 2023a).
+This exploratory approach is powerful for generating a wide array of skills but may lack precision. In con-
+trast, systems like ATLASS, Alita, and Live-SWE-Agent take a more reactive approach, often creating new
+tools from scratch or employing retrieval-augmented generation (RAG) to search open-source code reposi-
+tories the moment a capability gap is identified(Haque et al., 2025; Qiu et al., 2025b;a; Xia et al., 2025a).
+At the other end of the spectrum lie highly structured frameworks that treat tool creation as a deliberate
+engineering process. CREATOR, for example, disentangles abstract tool creation (e.g., reasoning about the
+general structure of a reusable function for averaging temperatures over N days) from concrete tool usage
+(e.g., deciding how to apply that function to a specific city and time range), which enhances modularity and
+reusability(Qian et al., 2023b). Even more formally, SkillWeaver analyzes successful human or agent task
+trajectories to propose, synthesize, and hone new skills into robust, reusable APIs, ensuring a higher degree
+of initial quality(Zheng et al., 2025a). Furthermore, frameworks like CRAFT demonstrate that creating
+specialized toolsets for specific domains is essential to complement general-purpose models, enabling expert-
+level performance without sacrificing adaptability(Yuan et al., 2024a). RL-GPT(Liu et al., 2024) integrates
+generated code implementations into the RL pipeline, leveraging these as tools to tackle complex tasks while
+addressing simpler ones directly using a Code-as-Policy approach. This integration dynamically adapts and
+evolves in response to environmental feedback, enabling continuous improvement. However, this burgeoning
+autonomy introduces significant challenges, particularly around safety and security. The unconstrained gen-
+eration of code risks creating tools with exploitable vulnerabilities or unintended harmful behaviors, making
+automated verification and sandboxing critical areas for future research.
+
+Mastery Through Iterative Refinement The proliferation of self-created tools necessitates a robust
+mechanism for their mastery; a newly generated tool is often a brittle script, not a reliable function. This is
+where iterative refinement becomes essential. Frameworks like LearnAct and From Exploration to Mastery
+establish a critical self-correction loop where the agent learns from its own experience(Zhao et al., 2024b;
+
+
+                                                      13
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+Qu et al., 2025). This involves tackling the difficult "credit assignment" problem: determining precisely
+which line of code or which parameter was responsible for a failure. To do this, the agent analyzes a rich
+variety of feedback signals—including compiler errors, unexpected API return values, environmental state
+changes, or even implicit signals from a user’s subsequent actions. The goal is not only to debug the tool’s
+underlying code but also to refine its documentation (e.g., its docstring and argument descriptions), which
+is crucial for improving the agent’s ability to understand and correctly use the tool in the future. This
+refinement process also opens the door for valuable human-agent collaboration. While full autonomy is the
+ultimate goal, many systems can be designed with a "human in the loop," where a human expert can provide
+corrections, offer high-level suggestions, or validate a newly created tool. This collaborative approach can
+significantly accelerate the mastery process and ensure that the agent’s skills align with human intentions
+and safety standards. Ultimately, this self-honing process is what elevates a nascent skill into a dependable
+capability, ensuring the agent’s growing skill library increases not just in quantity, but more importantly, in
+quality and robustness.
+
+Scalable Management and Selection As an agent’s mastered skill library grows into the hundreds or
+thousands, it faces a "curse of abundance." The challenge shifts from creating tools to efficiently managing
+and selecting from them. A large library creates a massive search space, making traditional retrieval methods
+slow and inaccurate. To overcome this, ToolGen (Wang et al., 2025k) represents a fundamental paradigm
+shift by encoding tools as unique tokens within the language model’s vocabulary. This elegantly reframes
+tool retrieval as a generation problem, leveraging the transformer’s immense pattern-recognition capabilities
+to predict the most appropriate tool as a natural continuation of its thought process. TOOLMEM (Xiao
+et al., 2025b) enables agents to learn and store the strengths and weaknesses of different tools in a dedicated
+memory. At inference, the agent retrieves this knowledge to make more informed decisions, optimizing tool
+selection for specific task requirements. Beyond selecting a single tool, advanced agents must also excel at
+tool composition—learning to chain multiple tools in novel sequences to solve multi-step problems. This is a
+higher-order management task. Architectural approaches like AgentSquare engage in a form of meta-learning,
+automatically searching the modular design space of an agent—including its planning, memory, and tool-use
+components—to find an optimal configuration for complex task execution(Shang et al., 2025). As a logical
+endpoint to this evolutionary trend, visionary concepts like the Darwin Godel Machine propose a framework
+for open-ended evolution, where the agent can fundamentally rewrite its own core code. In this vision,
+the distinction between the agent and its tools blurs, leading to a recursive cascade of self-improvement
+that transcends tool enhancement alone(Zhang et al., 2025h). In essence, this entire evolutionary path
+aims to establish a closed and virtuous cycle: a truly autonomous agent that can perceive gaps in its
+capabilities, create novel solutions, master them through practice, and seamlessly integrate them into a
+coherently managed and ever-expanding repertoire.
+

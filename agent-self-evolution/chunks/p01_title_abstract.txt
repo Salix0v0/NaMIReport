@@ -1,0 +1,100 @@
+                                         Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                                         A Survey of Self-Evolving Agents
+                                         What, When, How, and Where to Evolve on the Path to Artificial Super Intelligence
+
+
+                                         Huan-ang Gaoγ† , Jiayi Gengα† , Wenyue Huaϵ† , Mengkang Huω† , Xinzhe Juanσµ† , Hongzhang
+                                         Liuξ† , Shilong Liuα† , Jiahao Qiuαδ† , Xuan Qiγ† , Qihan Renσ† , Yiran Wuρ† , Hongru Wangk†✉ ,
+                                         Han Xiaoτ † , Yuhang Zhouλ† , Shaokun Zhangρ† , Jiayi Zhangπ , Jinyu Xiang, Yixiong Fangθ ,
+                                         Qiwen Zhaoζ , Dongrui Liuσ , Cheng Qianβ , Zhenhailong Wangβ , Minda Huτ , Huazheng
+                                         Wangη , Qingyun Wuρ , Heng Jiβ , Mengdi Wangαδ ✉
+
+                                         α
+                                          Princeton University, δ Princeton AI Lab, γ Tsinghua University, θ Carnegie Mellon University, ξ University
+                                         of Sydney, σ Shanghai Jiao Tong University, ρ Pennsylvania State University, µ University of Michigan, η Oregon State
+arXiv:2507.21046v4 [cs.AI] 16 Jan 2026
+
+
+
+
+                                         University, τ The Chinese University of Hong Kong, λ Fudan University, π The Hong Kong University of Science and
+                                         Technology (Guangzhou), ω The University of Hong Kong, ϵ University of California, Santa Barbara, ζ University of
+                                         California San Diego, k University of Edinburgh, β University of Illinois Urbana-Champaign
+
+                                         Github Repo: https://github.com/CharlesQ9/Self-Evolving-Agents
+                                         †
+                                           Equal contribution and the order is determined alphabetically, ✉ Corresponding Author
+
+                                         Reviewed on OpenReview: https://openreview.net/forum?id=CTr3bovS5F
+
+
+
+                                                                                             Abstract
+
+
+
+
+                                                 Large Language Models (LLMs) have demonstrated remarkable capabilities across diverse
+                                                 tasks but remain fundamentally static, unable to adapt their internal parameters to novel
+                                                 tasks, evolving knowledge domains, or dynamic interaction contexts. As LLMs are increas-
+                                                 ingly deployed in open-ended, interactive environments, this static nature has become a
+                                                 critical bottleneck, necessitating agents that can adaptively reason, act, and evolve in real
+                                                 time. This paradigm shift —from scaling static models to developing self-evolving agents
+                                                 — has sparked growing interest in architectures and methods enabling continual learning
+                                                 and adaptation from data, interactions, and experiences. This survey provides the first sys-
+                                                 tematic and comprehensive review of self-evolving agents, organizing the field around three
+                                                 foundational dimensions — what to evolve, when to evolve, and how to evolve. We examine
+                                                 evolutionary mechanisms across agent components (e.g., models, memory, tools, architec-
+                                                 ture), categorize adaptation methods by stages (e.g., intra-test-time, inter-test-time), and
+                                                 analyze the algorithmic and architectural designs that guide evolutionary adaptation (e.g.,
+                                                 scalar rewards, textual feedback, single-agent and multi-agent systems). Additionally, we
+                                                 analyze evaluation metrics and benchmarks tailored for self-evolving agents, highlight appli-
+                                                 cations in domains such as coding, education, and healthcare, and identify critical challenges
+                                                 and research directions in safety, scalability, and co-evolutionary dynamics. By providing
+                                                 a structured framework for understanding and designing self-evolving agents, this survey
+                                                 establishes a roadmap for advancing more adaptive, capable, robust, and versatile agentic
+                                                 systems in both research and real-world deployments, and ultimately sheds light on the real-
+                                                 ization of Artificial Super Intelligence (ASI) where agents evolve autonomously and perform
+                                                 beyond human-level intelligence across a wide array of tasks.
+
+
+
+
+                                                                                                  1
+Published in Transactions on Machine Learning Research (01/2026)
+
+
+
+
+                         Planning                                   Learning & Evolution                         To be Explored …
+                                                                    Mechanisms                     Alita
+                         Tool Calling               smolagents
+                                                                                                   Gödel agent                                                         Level of
+                         Workflow Construction      Manus                                          …                                     ???
+           GPT-4
+                                                                                                                                                                       Intelligence
+                         …                          ChatGPT agent
+           Claude-4                                 …                                 Self-evolving Agents
+                                                                                                                                Next-generation Agentic Intelligence
+           DeepSeek-R1
+           …                               Foundation Agents
+                                                                                    Learning from Feedback & Experience
+         LLMs
+                                            Execution via Tools & Planning
+                                                                                               Our Survey
+ Language Understanding & Generation
+
+
+
+
+Figure 1: A conceptual trajectory illustrating the progression from large language models (LLMs) to
+foundation agents, and then to self-evolving agents—our focus, and ultimately toward the hypothetical
+Artificial Super Intelligence (ASI). Along this path, intelligence and adaptivity increase, marking a shift
+toward more autonomous and agentic AI systems. The future directions beyond self-evolving agents remain
+open and subject to ongoing exploration.
+
+
